@@ -1023,7 +1023,7 @@
 
   /* ── Composer: 모바일 가로 방향 ── */
   @media (max-width: 767px) and (orientation: landscape) {
-    .composer-overlay { display: grid; grid-template-rows: auto 1fr; grid-template-columns: 1fr 250px; }
+    .composer-overlay { grid-template-rows: auto 1fr; grid-template-columns: 1fr 250px; }
     .composer-overlay.open { display: grid; }
     .comp-header { grid-column: 1 / -1; grid-row: 1; padding: 7px 14px; min-height: unset; }
     .comp-subtitle { display: none; }
@@ -1049,7 +1049,7 @@
     .pnote { min-width: 40px; padding: 6px 8px; font-size: 0.8rem; }
   }
   @media (min-width: 1200px) {
-    .composer-overlay { display: grid; grid-template-rows: auto 1fr; grid-template-columns: 1fr 340px; }
+    .composer-overlay { grid-template-rows: auto 1fr; grid-template-columns: 1fr 340px; }
     .composer-overlay.open { display: grid; }
     .comp-header { grid-column: 1 / -1; grid-row: 1; }
     .comp-body { grid-column: 1; grid-row: 2; overflow-y: auto; }
