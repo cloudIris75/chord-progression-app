@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코드 진행 추천기</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #232333;
+    --border: #2e2e42;
+    --accent: #7c6dfa;
+    --accent2: #c084fc;
+    --accent3: #38bdf8;
+    --text: #e2e2f0;
+    --text-muted: #8888aa;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  header .logo {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  header .subtitle {
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .chip {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .chip.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 16px rgba(124,109,250,0.4);
+  }
+
+  .key-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .key-selector label {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .key-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .key-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .key-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .key-btn.active {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: #000;
+    font-weight: 800;
+  }
+
+  #results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 1rem; }
+
+  .prog-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .prog-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .prog-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .prog-card:hover::before { opacity: 1; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-genre { background: rgba(124,109,250,0.2); color: var(--accent); }
+  .tag-mood  { background: rgba(192,132,252,0.2); color: var(--accent2); }
+
+  .chord-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .chord-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .chord-name {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    min-width: 52px;
+    text-align: center;
+    letter-spacing: -0.3px;
+    transition: background 0.15s;
+  }
+
+  .chord-box:hover .chord-name {
+    background: rgba(124,109,250,0.15);
+    border-color: var(--accent);
+  }
+
+  .roman {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .arrow {
+    color: var(--border);
+    font-size: 1rem;
+    padding-bottom: 14px;
+  }
+
+  .card-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .meta-item span { color: var(--warning); font-weight: 600; }
+
+  .copy-btn {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { color: var(--accent3); border-color: var(--accent3); }
+  .copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+  .filter-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .results-count {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .results-count strong {
+    color: var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    header .logo { font-size: 1.5rem; }
+    #results { grid-template-columns: 1fr; }
+    .chord-name { padding: 6px 10px; font-size: 0.95rem; min-width: 44px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">🎵 코드 진행 추천기</div>
+    <p class="subtitle">장르와 분위기를 선택하면 어울리는 코드 진행을 추천해드립니다</p>
+  </header>
+
+  <div class="filter-bar">
+    <div class="section-label">장르 선택</div>
+    <div class="chip-group" id="genre-chips"></div>
+
+    <div class="section-label">분위기 선택</div>
+    <div class="chip-group" id="mood-chips"></div>
+
+    <div class="key-selector">
+      <label>🎹 조성 (Key)</label>
+      <div class="key-buttons" id="key-buttons"></div>
+    </div>
+  </div>
+
+  <div class="results-header">
+    <div class="results-count" id="results-count"></div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+const GENRES = ['팝', '재즈', '록', 'R&B / 소울', '블루스', '클래식', 'EDM', '포크 / 어쿠스틱', '보사노바', '메탈'];
+const MOODS  = ['밝고 경쾌한', '슬프고 감성적인', '낭만적인', '긴장감 / 어두운', '웅장하고 웅장한', '편안하고 차분한', '에너제틱', '신비로운'];
+
+const KEYS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+// Semitone offsets from C
+const NOTE_SEMITONES = { C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11 };
+const SEMITONE_NAMES = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+
+function transposeChord(chord, semitones) {
+  if (!chord || chord === '/') return chord;
+  // Parse chord: root + optional modifier
+  const match = chord.match(/^([A-G][#b]?)(.*)/);
+  if (!match) return chord;
+  const [, root, mod] = match;
+  const base = NOTE_SEMITONES[root];
+  if (base === undefined) return chord;
+  const newSemi = ((base + semitones) % 12 + 12) % 12;
+  return SEMITONE_NAMES[newSemi] + mod;
+}
+
+function transposeProgression(chords, fromKey, toKey) {
+  const diff = (NOTE_SEMITONES[toKey] - NOTE_SEMITONES[fromKey] + 12) % 12;
+  return chords.map(c => transposeChord(c, diff));
+}
+
+// ─── Chord Progression Database ────────────────────────────────────────────
+// Each entry: { title, genres[], moods[], key, chords[], romans[], bpm, feel, desc }
+const DB = [
+  // ── POP ──
+  {
+    title: "I–V–vi–IV (팝의 교과서)",
+    genres: ['팝'],
+    moods: ['밝고 경쾌한', '낭만적인'],
+    key: 'C',
+    chords: ['C','G','Am','F'],
+    romans: ['I','V','vi','IV'],
+    bpm: '100–130',
+    feel: '4/4',
+    desc: "세상에서 가장 많이 쓰이는 팝 코드 진행. Let Her Go, Let It Be 등 수백 곡에 사용. 따뜻하고 친근한 느낌."
+  },
+  {
+    title: "vi–IV–I–V (팝 발라드)",
+    genres: ['팝', 'R&B / 소울'],
+    moods: ['슬프고 감성적인', '낭만적인'],
+    key: 'C',
+    chords: ['Am','F','C','G'],
+    romans: ['vi','IV','I','V'],
+    bpm: '70–90',
+    feel: '4/4',
+    desc: "I–V–vi–IV를 vi에서 시작한 버전. 살짝 감성적이고 쓸쓸한 뉘앙스. 팝 발라드에 최적."
+  },
+  {
+    title: "I–IV–V (3코드 팝/록)",
+    genres: ['팝', '록', '포크 / 어쿠스틱'],
+    moods: ['밝고 경쾌한', '에너제틱'],
+    key: 'G',
+    chords: ['G','C','D'],
+    romans: ['I','IV','V'],
+    bpm: '90–140',
+    feel: '4/4',
+    desc: "가장 기본적인 3코드. 초보자부터 프로까지 즐겨 사용. 에너지 넘치고 직접적인 느낌."
+  },
+  {
+    title: "ii–V–I–IV (팝/재즈 혼합)",
+    genres: ['팝', '재즈'],
+    moods: ['낭만적인', '편안하고 차분한'],
+    key: 'C',
+    chords: ['Dm','G','C','F'],
+    romans: ['ii','V','I','IV'],
+    bpm: '80–110',
+    feel: '4/4',
+    desc: "ii–V–I 재즈 어법에 IV를 추가. 세련되고 부드러운 흐름. 어른스러운 팝에 잘 어울림."
+  },
+
+  // ── JAZZ ──
+  {
+    title: "ii–V–I (재즈의 핵심)",
+    genres: ['재즈'],
+    moods: ['낭만적인', '신비로운', '편안하고 차분한'],
+    key: 'C',
+    chords: ['Dm7','G7','Cmaj7'],
+    romans: ['ii⁷','V⁷','Imaj⁷'],
+    bpm: '60–160',
+    feel: '4/4 or swing',
+    desc: "재즈에서 가장 중요한 진행. 세련된 해결감. 여기에 반음계 대리화음을 더하면 더욱 풍부해짐."
+  },
+  {
+    title: "I–vi–ii–V (리듬 체인지)",
+    genres: ['재즈'],
+    moods: ['밝고 경쾌한', '에너제틱'],
+    key: 'Bb',
+    chords: ['Bbmaj7','Gm7','Cm7','F7'],
+    romans: ['Imaj⁷','vi⁷','ii⁷','V⁷'],
+    bpm: '140–220',
+    feel: 'swing',
+    desc: "Rhythm Changes의 A section. Gershwin의 'I Got Rhythm' 기반. 비밥 연주자들이 즐겨 사용."
+  },
+  {
+    title: "IM7–bVII7–bVI7–V7 (재즈 블루스)",
+    genres: ['재즈', '블루스'],
+    moods: ['신비로운', '슬프고 감성적인'],
+    key: 'C',
+    chords: ['Cmaj7','Bb7','Ab7','G7'],
+    romans: ['Imaj⁷','bVII⁷','bVI⁷','V⁷'],
+    bpm: '60–100',
+    feel: 'swing / 12/8',
+    desc: "크로매틱하게 내려오는 도미넌트 7th 체인. 블루지하고 묵직한 재즈 사운드."
+  },
+  {
+    title: "i–IV7–i–V7 (마이너 재즈)",
+    genres: ['재즈'],
+    moods: ['신비로운', '긴장감 / 어두운'],
+    key: 'Cm',
+    chords: ['Cm7','F7','Cm7','G7'],
+    romans: ['i⁷','IV⁷','i⁷','V⁷'],
+    bpm: '70–130',
+    feel: 'swing',
+    desc: "마이너 키 재즈 진행. 도리안 모드 느낌. 묵직하고 서정적인 마이너 재즈."
+  },
+
+  // ── ROCK ──
+  {
+    title: "I–bVII–IV (파워 록)",
+    genres: ['록', '메탈'],
+    moods: ['에너제틱', '웅장하고 웅장한'],
+    key: 'E',
+    chords: ['E','D','A'],
+    romans: ['I','bVII','IV'],
+    bpm: '120–160',
+    feel: '4/4',
+    desc: "믹솔리디안 사운드. 강렬하고 파워풀. Sweet Home Alabama, All Right Now 등 수많은 록 명곡에 사용."
+  },
+  {
+    title: "i–bVI–bIII–bVII (마이너 록)",
+    genres: ['록', '메탈'],
+    moods: ['긴장감 / 어두운', '에너제틱'],
+    key: 'Am',
+    chords: ['Am','F','C','G'],
+    romans: ['i','bVI','bIII','bVII'],
+    bpm: '100–150',
+    feel: '4/4',
+    desc: "자연 단음계 기반. 어둡지만 강렬한 에너지. 헤비 록과 팝 록에서 널리 쓰임."
+  },
+  {
+    title: "I–IV–bVII–IV (록 순환)",
+    genres: ['록'],
+    moods: ['에너제틱', '밝고 경쾌한'],
+    key: 'A',
+    chords: ['A','D','G','D'],
+    romans: ['I','IV','bVII','IV'],
+    bpm: '110–150',
+    feel: '4/4',
+    desc: "록에서 흔한 순환 진행. 밝고 드라이빙한 에너지. 기타 리프와 잘 어울림."
+  },
+
+  // ── R&B / SOUL ──
+  {
+    title: "I–iii–IV–V (소울 팝)",
+    genres: ['R&B / 소울', '팝'],
+    moods: ['낭만적인', '밝고 경쾌한'],
+    key: 'C',
+    chords: ['C','Em','F','G'],
+    romans: ['I','iii','IV','V'],
+    bpm: '80–100',
+    feel: '4/4',
+    desc: "iii 코드가 포인트. 밝지만 감성적인 뉘앙스. 모던 R&B와 네오 소울에 자주 등장."
+  },
+  {
+    title: "i–bVII–bVI–bVII (네오 소울)",
+    genres: ['R&B / 소울'],
+    moods: ['낭만적인', '편안하고 차분한', '슬프고 감성적인'],
+    key: 'Dm',
+    chords: ['Dm','C','Bb','C'],
+    romans: ['i','bVII','bVI','bVII'],
+    bpm: '65–90',
+    feel: '4/4',
+    desc: "D'Angelo, Erykah Badu 스타일. 그루비하고 따뜻한 마이너 소울."
+  },
+  {
+    title: "IVmaj7–iii7–ii7–I (R&B 하강)",
+    genres: ['R&B / 소울'],
+    moods: ['낭만적인', '슬프고 감성적인'],
+    key: 'C',
+    chords: ['Fmaj7','Em7','Dm7','C'],
+    romans: ['IVmaj⁷','iii⁷','ii⁷','I'],
+    bpm: '70–90',
+    feel: '4/4',
+    desc: "베이스라인이 반음씩 내려오는 진행. 부드럽고 감성적. 재즈 R&B 느낌."
+  },
+
+  // ── BLUES ──
+  {
+    title: "12마디 블루스",
+    genres: ['블루스'],
+    moods: ['슬프고 감성적인', '에너제틱'],
+    key: 'A',
+    chords: ['A7','A7','A7','A7','D7','D7','A7','A7','E7','D7','A7','E7'],
+    romans: ['I⁷','I⁷','I⁷','I⁷','IV⁷','IV⁷','I⁷','I⁷','V⁷','IV⁷','I⁷','V⁷'],
+    bpm: '60–140',
+    feel: '4/4 or 12/8 shuffle',
+    desc: "블루스의 근본. 12마디 구조. 셔플 리듬으로 연주하면 더욱 블루지한 느낌."
+  },
+  {
+    title: "i–iv–V7 (마이너 블루스)",
+    genres: ['블루스', '재즈'],
+    moods: ['슬프고 감성적인', '신비로운'],
+    key: 'Am',
+    chords: ['Am','Dm','E7'],
+    romans: ['i','iv','V⁷'],
+    bpm: '50–90',
+    feel: '12/8 shuffle',
+    desc: "우울하고 감성적인 마이너 블루스. 천천히 연주할수록 더 깊은 감정."
+  },
+
+  // ── CLASSICAL ──
+  {
+    title: "I–IV–V–I (클래식 종지)",
+    genres: ['클래식'],
+    moods: ['밝고 경쾌한', '웅장하고 웅장한'],
+    key: 'C',
+    chords: ['C','F','G','C'],
+    romans: ['I','IV','V','I'],
+    bpm: '60–120',
+    feel: '4/4 or 3/4',
+    desc: "완전 종지의 기본형. 바로크~고전 시대의 핵심 진행. 안정적이고 완결된 느낌."
+  },
+  {
+    title: "i–iv–V–i (클래식 마이너)",
+    genres: ['클래식'],
+    moods: ['슬프고 감성적인', '웅장하고 웅장한'],
+    key: 'Am',
+    chords: ['Am','Dm','E','Am'],
+    romans: ['i','iv','V','i'],
+    bpm: '60–100',
+    feel: '4/4 or 3/4',
+    desc: "화성 단음계 기반의 마이너 종지. 비장하고 드라마틱한 느낌."
+  },
+  {
+    title: "파헬벨 카논 진행",
+    genres: ['클래식', '팝'],
+    moods: ['낭만적인', '밝고 경쾌한'],
+    key: 'D',
+    chords: ['D','A','Bm','F#m','G','D','G','A'],
+    romans: ['I','V','vi','iii','IV','I','IV','V'],
+    bpm: '60–80',
+    feel: '4/4',
+    desc: "파헬벨의 카논 D장조 진행. 팝에서도 엄청나게 활용됨. 우아하고 낭만적인 사운드."
+  },
+  {
+    title: "I–V–vi–iii–IV (클래식 시퀀스)",
+    genres: ['클래식'],
+    moods: ['웅장하고 웅장한', '낭만적인'],
+    key: 'G',
+    chords: ['G','D','Em','Bm','C'],
+    romans: ['I','V','vi','iii','IV'],
+    bpm: '60–100',
+    feel: '4/4 or 3/4',
+    desc: "5도 하강 시퀀스. 헨델, 바흐 등이 즐겨 사용. 풍성하고 웅장한 느낌."
+  },
+
+  // ── EDM ──
+  {
+    title: "i–bVI–bIII–bVII (EDM 마이너)",
+    genres: ['EDM'],
+    moods: ['에너제틱', '긴장감 / 어두운'],
+    key: 'Am',
+    chords: ['Am','F','C','G'],
+    romans: ['i','bVI','bIII','bVII'],
+    bpm: '128–145',
+    feel: '4/4',
+    desc: "EDM에서 가장 많이 쓰이는 마이너 루프. 드롭 구간에 최적. 강렬하고 어두운 에너지."
+  },
+  {
+    title: "I–V–vi–IV (EDM 팝)",
+    genres: ['EDM', '팝'],
+    moods: ['밝고 경쾌한', '에너제틱'],
+    key: 'Ab',
+    chords: ['Ab','Eb','Fm','Db'],
+    romans: ['I','V','vi','IV'],
+    bpm: '120–138',
+    feel: '4/4',
+    desc: "밝고 업리프팅한 EDM. Avicii 스타일. 신스 리드와 완벽한 조합."
+  },
+  {
+    title: "iv–I–v–I (EDM 하우스)",
+    genres: ['EDM'],
+    moods: ['편안하고 차분한', '신비로운'],
+    key: 'C',
+    chords: ['Fm','C','Gm','C'],
+    romans: ['iv','I','v','I'],
+    bpm: '120–130',
+    feel: '4/4',
+    desc: "딥 하우스/테크노 느낌. iv 코드가 주는 모달한 분위기. 최면적이고 반복적."
+  },
+
+  // ── FOLK / ACOUSTIC ──
+  {
+    title: "I–V–IV–I (포크 기본)",
+    genres: ['포크 / 어쿠스틱'],
+    moods: ['밝고 경쾌한', '편안하고 차분한'],
+    key: 'G',
+    chords: ['G','D','C','G'],
+    romans: ['I','V','IV','I'],
+    bpm: '80–110',
+    feel: '4/4 or 3/4',
+    desc: "어쿠스틱 기타의 기본. 따뜻하고 소박한 느낌. 핑거스타일, 스트러밍 모두 잘 어울림."
+  },
+  {
+    title: "I–IV–vi–V (포크 서정)",
+    genres: ['포크 / 어쿠스틱', '팝'],
+    moods: ['슬프고 감성적인', '낭만적인'],
+    key: 'C',
+    chords: ['C','F','Am','G'],
+    romans: ['I','IV','vi','V'],
+    bpm: '70–95',
+    feel: '3/4 or 4/4',
+    desc: "서정적이고 아름다운 포크 진행. 왈츠 박자로 연주하면 감성이 배가됨."
+  },
+  {
+    title: "I–iii–IV–I (아메리카나)",
+    genres: ['포크 / 어쿠스틱'],
+    moods: ['편안하고 차분한', '낭만적인'],
+    key: 'D',
+    chords: ['D','F#m','G','D'],
+    romans: ['I','iii','IV','I'],
+    bpm: '70–90',
+    feel: '4/4',
+    desc: "iii 코드가 따뜻한 색채를 더해줌. 컨트리, 아메리카나 스타일. 마음이 편안해지는 사운드."
+  },
+
+  // ── BOSSA NOVA ──
+  {
+    title: "Imaj7–ii7–V7–Imaj7 (보사노바 기본)",
+    genres: ['보사노바'],
+    moods: ['낭만적인', '편안하고 차분한'],
+    key: 'C',
+    chords: ['Cmaj7','Dm7','G7','Cmaj7'],
+    romans: ['Imaj⁷','ii⁷','V⁷','Imaj⁷'],
+    bpm: '120–140',
+    feel: 'bossa (2/4 or 4/4)',
+    desc: "이파네마의 소녀 스타일. 부드럽고 세련된 브라질 사운드. 코드 보이싱이 핵심."
+  },
+  {
+    title: "IVmaj7–bVII7–Imaj7 (보사 전조)",
+    genres: ['보사노바', '재즈'],
+    moods: ['신비로운', '낭만적인'],
+    key: 'C',
+    chords: ['Fmaj7','Bb7','Cmaj7'],
+    romans: ['IVmaj⁷','bVII⁷','Imaj⁷'],
+    bpm: '110–130',
+    feel: 'bossa',
+    desc: "트리톤 대리화음 느낌. 보사노바 특유의 색채 변화. Jobim 스타일의 세련된 움직임."
+  },
+
+  // ── METAL ──
+  {
+    title: "i–bVI–bVII–i (파워 메탈)",
+    genres: ['메탈', '록'],
+    moods: ['웅장하고 웅장한', '에너제틱'],
+    key: 'Em',
+    chords: ['Em','C','D','Em'],
+    romans: ['i','bVI','bVII','i'],
+    bpm: '140–200',
+    feel: '4/4',
+    desc: "메탈 리프의 클래식. 파워 코드로 연주. 강렬하고 웅장한 에너지."
+  },
+  {
+    title: "i–bII–i–V (프리지안 메탈)",
+    genres: ['메탈'],
+    moods: ['긴장감 / 어두운', '신비로운'],
+    key: 'Em',
+    chords: ['Em','F','Em','B'],
+    romans: ['i','bII','i','V'],
+    bpm: '130–180',
+    feel: '4/4',
+    desc: "프리지안 모드 활용. Metallica, Megadeth 스타일. 불안하고 공격적인 사운드."
+  },
+  {
+    title: "i–iv–bVII–bIII (심포닉 메탈)",
+    genres: ['메탈', '클래식'],
+    moods: ['웅장하고 웅장한', '긴장감 / 어두운'],
+    key: 'Dm',
+    chords: ['Dm','Gm','C','F'],
+    romans: ['i','iv','bVII','bIII'],
+    bpm: '100–140',
+    feel: '4/4',
+    desc: "심포닉/파워 메탈 느낌. 오케스트라와의 조합에 최적. 웅장하고 드라마틱."
+  },
+
+  // ── EXTRA ──
+  {
+    title: "I–bIII–IV–bVI (레게 / 스카)",
+    genres: ['팝'],
+    moods: ['밝고 경쾌한', '편안하고 차분한'],
+    key: 'C',
+    chords: ['C','Eb','F','Ab'],
+    romans: ['I','bIII','IV','bVI'],
+    bpm: '80–100',
+    feel: '4/4 (offbeat)',
+    desc: "믹솔리디안 + 블루 노트. 레게/스카의 느낌. 오프비트 스트러밍으로 연주하면 그루비함이 살아남."
+  },
+  {
+    title: "I–vi–IV–ii (서정적 팝)",
+    genres: ['팝', 'R&B / 소울'],
+    moods: ['슬프고 감성적인', '낭만적인'],
+    key: 'C',
+    chords: ['C','Am','F','Dm'],
+    romans: ['I','vi','IV','ii'],
+    bpm: '70–90',
+    feel: '4/4',
+    desc: "ii 코드로 끝나 부드럽게 열린 느낌. 서정적이고 감성적인 팝 발라드."
+  },
+  {
+    title: "I–bVII–bVI–bVII (클리셰 에픽)",
+    genres: ['클래식', 'EDM', '메탈'],
+    moods: ['웅장하고 웅장한', '에너제틱'],
+    key: 'C',
+    chords: ['C','Bb','Ab','Bb'],
+    romans: ['I','bVII','bVI','bVII'],
+    bpm: '80–120',
+    feel: '4/4',
+    desc: "영화 음악, 게임 OST에서 자주 등장. 반음계 하강이 장엄하고 서사적인 분위기를 만들어냄."
+  },
+  {
+    title: "i–bVII–bVI–V7 (플라멩코 / 에스파냐)",
+    genres: ['클래식'],
+    moods: ['긴장감 / 어두운', '에너제틱', '신비로운'],
+    key: 'Am',
+    chords: ['Am','G','F','E7'],
+    romans: ['i','bVII','bVI','V⁷'],
+    bpm: '140–180',
+    feel: '12/8 or 3/4',
+    desc: "프리지안 cadence. 플라멩코의 핵심 진행. V7(E7)로 강하게 해결. 정열적이고 긴박한 스페인 느낌."
+  },
+];
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let selectedGenres = new Set();
+let selectedMoods  = new Set();
+let selectedKey    = 'C';
+
+// ─── Init chips ─────────────────────────────────────────────────────────────
+function buildChips(items, containerId, selectedSet, onToggle) {
+  const el = document.getElementById(containerId);
+  items.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = item;
+    chip.addEventListener('click', () => {
+      if (selectedSet.has(item)) {
+        selectedSet.delete(item);
+        chip.classList.remove('active');
+      } else {
+        selectedSet.add(item);
+        chip.classList.add('active');
+      }
+      onToggle();
+    });
+    el.appendChild(chip);
+  });
+}
+
+function buildKeyButtons() {
+  const el = document.getElementById('key-buttons');
+  KEYS.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'key-btn' + (k === 'C' ? ' active' : '');
+    btn.textContent = k;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.key-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedKey = k;
+      render();
+    });
+    el.appendChild(btn);
+  });
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+function render() {
+  const noFilter = selectedGenres.size === 0 && selectedMoods.size === 0;
+  const filtered = DB.filter(p => {
+    const gMatch = selectedGenres.size === 0 || p.genres.some(g => selectedGenres.has(g));
+    const mMatch = selectedMoods.size  === 0 || p.moods.some(m => selectedMoods.has(m));
+    return gMatch && mMatch;
+  });
+
+  const countEl = document.getElementById('results-count');
+  countEl.innerHTML = filtered.length > 0
+    ? `<strong>${filtered.length}</strong>개의 코드 진행을 찾았습니다`
+    : '';
+
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🎼</div>
+        <p>선택한 조건에 맞는 코드 진행이 없습니다.<br>다른 장르나 분위기를 선택해보세요.</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach((p, idx) => {
+    const transposedChords = transposeProgression(p.chords, p.key, selectedKey);
+    const card = document.createElement('div');
+    card.className = 'prog-card';
+
+    const chordItems = transposedChords.map((ch, i) => {
+      const isLast = i === transposedChords.length - 1;
+      return `
+        <div class="chord-box">
+          <div class="chord-name">${ch}</div>
+          <div class="roman">${p.romans[i] || ''}</div>
+        </div>
+        ${!isLast ? '<div class="arrow">›</div>' : ''}
+      `;
+    }).join('');
+
+    const genreTags = p.genres.map(g => `<span class="tag tag-genre">${g}</span>`).join('');
+    const moodTags  = p.moods.map(m  => `<span class="tag tag-mood">${m}</span>`).join('');
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${p.title}</div>
+        <div class="card-tags">${genreTags}</div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item">🎹 Key: <span>${selectedKey}</span></div>
+        <div class="meta-item">🥁 BPM: <span>${p.bpm}</span></div>
+        <div class="meta-item">📐 박자: <span>${p.feel}</span></div>
+      </div>
+      <div class="chord-row">${chordItems}</div>
+      <div class="card-tags" style="margin-bottom:10px">${moodTags}</div>
+      <div class="card-desc">${p.desc}</div>
+      <button class="copy-btn" data-chords="${transposedChords.join(' – ')}">복사</button>
+    `;
+
+    card.querySelector('.copy-btn').addEventListener('click', function() {
+      navigator.clipboard.writeText(this.dataset.chords).then(() => {
+        this.textContent = '✓ 복사됨';
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.textContent = '복사';
+          this.classList.remove('copied');
+        }, 1500);
+      });
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// ─── Boot ────────────────────────────────────────────────────────────────────
+buildChips(GENRES, 'genre-chips', selectedGenres, render);
+buildChips(MOODS,  'mood-chips',  selectedMoods,  render);
+buildKeyButtons();
+render();
+</script>
+</body>
+</html>
