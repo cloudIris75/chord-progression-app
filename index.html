@@ -288,20 +288,38 @@
 
   .meta-item span { color: var(--warning); font-weight: 600; }
 
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    gap: 8px;
+  }
+  .note-btn {
+    background: rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.25);
+    border-radius: 8px;
+    color: var(--accent3);
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .note-btn:hover { background: rgba(56,189,248,0.18); border-color: var(--accent3); }
   .copy-btn {
-    position: absolute;
-    bottom: 14px;
-    right: 16px;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text-muted);
     font-size: 0.75rem;
-    padding: 4px 10px;
+    padding: 5px 12px;
     cursor: pointer;
     transition: all 0.15s;
+    white-space: nowrap;
   }
-
   .copy-btn:hover { color: var(--accent3); border-color: var(--accent3); }
   .copy-btn.copied { color: var(--success); border-color: var(--success); }
 
@@ -489,12 +507,163 @@
     font-style: italic;
   }
 
+  /* ── Note Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.74);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px 24px 28px;
+  }
+  .modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 1rem; font-weight: 800; line-height: 1.4; }
+  .modal-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    width: 34px; height: 34px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { color: var(--text); border-color: var(--text); }
+  .modal-legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 9px 13px;
+    background: var(--surface2);
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .legend-dot.root  { background: var(--accent); }
+  .legend-dot.chord { background: var(--success); }
+  .legend-dot.scale { background: #60a5fa; }
+  /* Per-chord section */
+  .cns {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: rgba(255,255,255,0.015);
+  }
+  .cns-header {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .cns-name { font-size: 1.45rem; font-weight: 900; }
+  .cns-roman {
+    font-size: 0.78rem; font-weight: 700;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 8px;
+    color: var(--text-muted);
+  }
+  .cns-type {
+    font-size: 0.69rem; font-weight: 700;
+    background: rgba(124,109,250,0.15);
+    color: var(--accent);
+    border-radius: 999px; padding: 2px 10px;
+  }
+  /* Chord tone chips */
+  .tone-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .tone-chip {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 5px 10px; border-radius: 9px;
+    font-size: 0.92rem; font-weight: 900; min-width: 44px; text-align: center;
+  }
+  .tone-chip small { font-size: 0.57rem; font-weight: 500; margin-top: 1px; opacity: 0.8; }
+  .tone-chip.t-root  { background: var(--accent); color: #fff; }
+  .tone-chip.t-chord { background: rgba(52,211,153,0.18); color: var(--success); border: 1px solid var(--success); }
+  /* Piano keyboard */
+  .piano-wrap {
+    position: relative; height: 78px;
+    margin: 14px 0 8px; user-select: none;
+  }
+  .piano-whites { display: flex; height: 100%; }
+  .piano-w {
+    flex: 1; height: 100%;
+    border: 1px solid #3a3a50; border-right: none;
+    border-radius: 0 0 5px 5px;
+    background: #b8b8cc;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 4px; position: relative; z-index: 1;
+    transition: background 0.1s;
+  }
+  .piano-w:last-child { border-right: 1px solid #3a3a50; }
+  .kl  { font-size: 0.57rem; font-weight: 800; color: #444; pointer-events: none; }
+  .piano-b {
+    position: absolute; top: 0; height: 54%;
+    background: #1a1a2e;
+    border-radius: 0 0 4px 4px; border: 1px solid #000;
+    z-index: 2;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 2px; transition: background 0.1s;
+  }
+  .klb { font-size: 0.48rem; font-weight: 800; color: #666; pointer-events: none; }
+  .piano-w.is-root  { background: var(--accent); }
+  .piano-w.is-chord { background: var(--success); }
+  .piano-w.is-scale { background: #60a5fa; }
+  .piano-b.is-root  { background: #9f8ef0; }
+  .piano-b.is-chord { background: #059669; }
+  .piano-b.is-scale { background: #2563eb; }
+  .piano-w.is-root .kl, .piano-w.is-chord .kl, .piano-w.is-scale .kl { color: #fff; font-weight: 900; }
+  .piano-b.is-root .klb, .piano-b.is-chord .klb, .piano-b.is-scale .klb { color: #fff; }
+  /* Scale recommendations */
+  .scale-rec { background: var(--surface2); border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+  .scale-rec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+  .scale-rec-name { font-size: 0.88rem; font-weight: 800; }
+  .scale-rec-badge {
+    font-size: 0.64rem; font-weight: 700;
+    background: rgba(56,189,248,0.15); color: var(--accent3);
+    border-radius: 999px; padding: 1px 7px;
+  }
+  .scale-rec-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 8px; }
+  .scale-notes-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sn {
+    padding: 3px 9px; border-radius: 6px;
+    font-size: 0.8rem; font-weight: 700;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+  }
+  .sn.sn-root  { background: rgba(124,109,250,0.15); border-color: var(--accent);  color: var(--accent);  }
+  .sn.sn-chord { background: rgba(52,211,153,0.12);  border-color: var(--success); color: var(--success); }
+
   @media (max-width: 600px) {
     header .logo { font-size: 1.5rem; }
     #results { grid-template-columns: 1fr; }
     .chord-name { padding: 6px 10px; font-size: 0.95rem; min-width: 44px; }
     .analyzer-input-row { flex-direction: column; }
     .analyze-btn { width: 100%; }
+    .modal-box { padding: 16px; }
   }
 </style>
 </head>
@@ -533,6 +702,13 @@
   </div>
 
   <div id="results"></div>
+</div>
+
+<!-- Note Analysis Modal -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal-box" id="note-modal-box">
+    <!-- filled by JS -->
+  </div>
 </div>
 
 <script>
@@ -1348,7 +1524,10 @@ function render() {
       <div class="chord-row">${chordItems}</div>
       <div class="card-tags" style="margin-bottom:10px">${moodTags}</div>
       <div class="card-desc">${p.desc}</div>
-      <button class="copy-btn" data-chords="${transposedChords.join(' – ')}">복사</button>
+      <div class="card-footer">
+        <button class="note-btn">🎹 코드별 사용 음</button>
+        <button class="copy-btn" data-chords="${transposedChords.join(' – ')}">복사</button>
+      </div>
     `;
 
     card.querySelector('.copy-btn').addEventListener('click', function() {
@@ -1362,9 +1541,225 @@ function render() {
       });
     });
 
+    card.querySelector('.note-btn').addEventListener('click', () => openNoteModal(p));
+
     container.appendChild(card);
   });
 }
+
+// ─── Note Analysis ───────────────────────────────────────────────────────────
+
+// Chord tone intervals (semitones from root)
+const CHORD_TONE_IVLS = {
+  major:   [0, 4, 7],
+  minor:   [0, 3, 7],
+  dim:     [0, 3, 6],
+  aug:     [0, 4, 8],
+  dom7:    [0, 4, 7, 10],
+  maj7:    [0, 4, 7, 11],
+  min7:    [0, 3, 7, 10],
+  dim7:    [0, 3, 6, 9],
+  minMaj7: [0, 3, 7, 11],
+};
+
+// Korean interval names
+const DEGREE_KR = {
+  0:'근음', 1:'단2', 2:'장2', 3:'단3', 4:'장3', 5:'완전4',
+  6:'증4/감5', 7:'완전5', 8:'단6/증5', 9:'장6', 10:'단7', 11:'장7'
+};
+
+// Chord type label
+const CHORD_TYPE_KR = {
+  major:'장3화음', minor:'단3화음', dim:'감3화음', aug:'증3화음',
+  dom7:'속7화음 (dom7)', maj7:'장7화음 (maj7)', min7:'단7화음 (min7)',
+  dim7:'감7화음 (dim7)', minMaj7:'단장7화음 (minMaj7)',
+};
+
+// Scale recommendations per chord type
+const SCALE_RECS_DB = {
+  major: [
+    { name:'Ionian (장음계)',    tag:'기본 추천', ivls:[0,2,4,5,7,9,11], desc:'가장 밝고 안정적. 팝·클래식에 기본.' },
+    { name:'Lydian',            tag:'세련',      ivls:[0,2,4,6,7,9,11], desc:'♯4가 특징. 빛나고 몽환적인 느낌.' },
+    { name:'Major Pentatonic',  tag:'안전',      ivls:[0,2,4,7,9],      desc:'5음 장음계. 어디서든 안전하게 사용 가능.' },
+  ],
+  minor: [
+    { name:'Dorian',            tag:'기본 추천', ivls:[0,2,3,5,7,9,10], desc:'장6도가 포인트. R&B·재즈·팝에서 가장 자주 추천.' },
+    { name:'Aeolian (자연단음계)',tag:'기본',     ivls:[0,2,3,5,7,8,10], desc:'어둡고 서정적인 기본 단음계.' },
+    { name:'Minor Pentatonic',  tag:'안전',      ivls:[0,3,5,7,10],     desc:'5음 단음계. 강렬한 기타 솔로에 최적.' },
+  ],
+  dom7: [
+    { name:'Mixolydian',        tag:'기본 추천', ivls:[0,2,4,5,7,9,10], desc:'♭7 장음계. 블루스·록·재즈의 기본.' },
+    { name:'Blues Scale',       tag:'블루스',    ivls:[0,3,5,6,7,10],   desc:'블루노트(♭5) 포함. 블루스·록 필수.' },
+    { name:'Lydian Dominant',   tag:'재즈',      ivls:[0,2,4,6,7,9,10], desc:'♯4+♭7. 재즈 솔로에서 세련된 색채.' },
+    { name:'Altered Scale',     tag:'어드밴스드', ivls:[0,1,3,4,6,8,10], desc:'모든 텐션 변형됨. 어드밴스드 재즈 솔로잉.' },
+  ],
+  maj7: [
+    { name:'Ionian (장음계)',    tag:'기본 추천', ivls:[0,2,4,5,7,9,11], desc:'밝고 안정적인 메이저 7th 기본 스케일.' },
+    { name:'Lydian',            tag:'재즈 추천', ivls:[0,2,4,6,7,9,11], desc:'♯4로 더욱 빛나는 재즈·팝 색채.' },
+  ],
+  min7: [
+    { name:'Dorian',            tag:'기본 추천', ivls:[0,2,3,5,7,9,10], desc:'마이너 7th에 가장 많이 추천되는 스케일.' },
+    { name:'Aeolian (자연단음계)',tag:'기본',     ivls:[0,2,3,5,7,8,10], desc:'더 어둡고 감성적인 마이너 색채.' },
+    { name:'Phrygian',          tag:'어두운',    ivls:[0,1,3,5,7,8,10], desc:'♭2가 특징. 이국적이고 어두운 느낌.' },
+  ],
+  dim: [
+    { name:'Diminished Scale (반-온)', tag:'추천', ivls:[0,1,3,4,6,7,9,10],  desc:'반음-온음 반복. 긴장감 극대화.' },
+    { name:'Whole-Tone Scale',         tag:'대안', ivls:[0,2,4,6,8,10],       desc:'온음만으로 구성. 몽환적·부유하는 느낌.' },
+  ],
+  dim7: [
+    { name:'Diminished Scale (온-반)', tag:'추천', ivls:[0,2,3,5,6,8,9,11],  desc:'온음-반음 패턴. 재즈 dim7에 사용.' },
+  ],
+  aug: [
+    { name:'Whole-Tone Scale',    tag:'기본 추천', ivls:[0,2,4,6,8,10],    desc:'온음만으로 구성. 몽환적·부유하는 느낌.' },
+    { name:'Lydian Augmented',    tag:'재즈',      ivls:[0,2,4,6,8,9,11],  desc:'♯4+♯5. 재즈 aug 화음에 사용.' },
+  ],
+  minMaj7: [
+    { name:'Harmonic Minor (화성단음계)', tag:'기본 추천', ivls:[0,2,3,5,7,8,11],  desc:'7도가 반음 올라간 단음계. 극적이고 클래식한 느낌.' },
+    { name:'Melodic Minor (선율단음계)',  tag:'재즈',      ivls:[0,2,3,5,7,9,11],  desc:'상행 선율단음계 = 재즈 마이너. 현대 재즈의 핵심.' },
+  ],
+};
+
+function getChordType(chord) {
+  const { quality, has7, hasMaj7 } = chord;
+  if (quality === 'dim') return has7 ? 'dim7' : 'dim';
+  if (quality === 'aug') return 'aug';
+  if (quality === 'minor') return hasMaj7 ? 'minMaj7' : has7 ? 'min7' : 'minor';
+  if (hasMaj7) return 'maj7';
+  if (has7)    return 'dom7';
+  return 'major';
+}
+
+function renderPiano(rootSemi, chordSemis, scaleSemis) {
+  const chordSet = new Set(chordSemis);
+  const scaleSet = new Set(scaleSemis);
+  const WHITE_SEMIS = [0,2,4,5,7,9,11];
+  const NOTE_LABELS = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+  const BLACK_KEYS  = [{s:1,l:10.0},{s:3,l:24.3},{s:6,l:52.8},{s:8,l:67.1},{s:10,l:81.4}];
+
+  function cls(semi) {
+    if (semi === rootSemi) return 'is-root';
+    if (chordSet.has(semi)) return 'is-chord';
+    if (scaleSet.has(semi)) return 'is-scale';
+    return '';
+  }
+  function lbl(semi) {
+    const c = cls(semi);
+    return c ? NOTE_LABELS[semi] : '';
+  }
+
+  const whites = WHITE_SEMIS.map(s =>
+    `<div class="piano-w ${cls(s)}"><span class="kl">${lbl(s)}</span></div>`
+  ).join('');
+
+  const blacks = BLACK_KEYS.map(({s, l}) =>
+    `<div class="piano-b ${cls(s)}" style="left:${l}%;width:8.4%"><span class="klb">${lbl(s)}</span></div>`
+  ).join('');
+
+  return `<div class="piano-wrap"><div class="piano-whites">${whites}</div>${blacks}</div>`;
+}
+
+function buildNoteModalContent(prog) {
+  const transposed = transposeProgression(prog.chords, prog.key, selectedKey);
+  const keyLabel   = `${selectedKey} ${prog.chords.some((c,i) => {
+    // rough check: if first chord is minor
+    const p = parseChordObj(transposed[0]);
+    return p && p.quality === 'minor';
+  }) ? '' : ''}`;
+
+  let html = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">🎹 코드별 사용 가능한 음</div>
+        <div class="modal-subtitle">${prog.title} &nbsp;·&nbsp; Key: ${selectedKey}</div>
+      </div>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-legend">
+      <div class="legend-item"><div class="legend-dot root"></div> 근음 (Root)</div>
+      <div class="legend-item"><div class="legend-dot chord"></div> 코드 구성음</div>
+      <div class="legend-item"><div class="legend-dot scale"></div> 추천 스케일 음</div>
+    </div>
+  `;
+
+  transposed.forEach((chordStr, i) => {
+    const chord    = parseChordObj(chordStr);
+    if (!chord) return;
+    const rootSemi = NOTE_SEMITONES[chord.root] ?? 0;
+    const ctype    = getChordType(chord);
+    const tivls    = CHORD_TONE_IVLS[ctype] ?? [0,4,7];
+    const chordSemis = tivls.map(iv => (rootSemi + iv) % 12);
+    const scales   = SCALE_RECS_DB[ctype] ?? SCALE_RECS_DB.major;
+    const roman    = prog.romans[i] ?? '';
+
+    // Chord tone chips
+    const toneChips = tivls.map((iv, ti) => {
+      const noteSemi = (rootSemi + iv) % 12;
+      const noteName = SEMITONE_NAMES[noteSemi];
+      const cls      = ti === 0 ? 't-root' : 't-chord';
+      return `<div class="tone-chip ${cls}">${noteName}<small>${DEGREE_KR[iv]}</small></div>`;
+    }).join('');
+
+    // Primary scale piano + scale cards
+    const primaryScale = scales[0];
+    const primarySemis = primaryScale.ivls.map(iv => (rootSemi + iv) % 12);
+
+    const piano = renderPiano(rootSemi, chordSemis, primarySemis);
+
+    const scaleCards = scales.map((sc, si) => {
+      const scaleSemis = sc.ivls.map(iv => (rootSemi + iv) % 12);
+      const noteChips  = sc.ivls.map(iv => {
+        const sem  = (rootSemi + iv) % 12;
+        const name = SEMITONE_NAMES[sem];
+        const cls  = iv === 0 ? 'sn-root' : chordSemis.includes(sem) ? 'sn-chord' : '';
+        return `<span class="sn ${cls}">${name}</span>`;
+      }).join('');
+      return `
+        <div class="scale-rec">
+          <div class="scale-rec-head">
+            <div class="scale-rec-name">${sc.name}</div>
+            <div class="scale-rec-badge">${sc.tag}</div>
+          </div>
+          <div class="scale-rec-desc">${sc.desc}</div>
+          <div class="scale-notes-row">${noteChips}</div>
+        </div>`;
+    }).join('');
+
+    html += `
+      <div class="cns">
+        <div class="cns-header">
+          <div class="cns-name">${chordStr}</div>
+          <div class="cns-roman">${roman}</div>
+          <div class="cns-type">${CHORD_TYPE_KR[ctype] ?? ctype}</div>
+        </div>
+        <div class="tone-chips">${toneChips}</div>
+        ${piano}
+        ${scaleCards}
+      </div>`;
+  });
+
+  return html;
+}
+
+function openNoteModal(prog) {
+  const modal = document.getElementById('note-modal');
+  const box   = document.getElementById('note-modal-box');
+  box.innerHTML = buildNoteModalContent(prog);
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  box.querySelector('#modal-close-btn').addEventListener('click', closeNoteModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeNoteModal(); });
+}
+
+function closeNoteModal() {
+  document.getElementById('note-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeNoteModal();
+});
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 buildChips(GENRES, 'genre-chips', selectedGenres, render);
