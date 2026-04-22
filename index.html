@@ -1020,6 +1020,26 @@
   @media (max-width: 767px) {
     .measures-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── Composer: 모바일 가로 방향 ── */
+  @media (max-width: 767px) and (orientation: landscape) {
+    .composer-overlay { display: grid; grid-template-rows: auto 1fr; grid-template-columns: 1fr 250px; }
+    .composer-overlay.open { display: grid; }
+    .comp-header { grid-column: 1 / -1; grid-row: 1; padding: 7px 14px; min-height: unset; }
+    .comp-subtitle { display: none; }
+    .bpm-lbl { display: none; }
+    .comp-body { grid-column: 1; grid-row: 2; overflow-y: auto; padding: 8px 12px; }
+    .comp-footer { grid-column: 2; grid-row: 2; border-top: none; border-left: 1.5px solid var(--border); max-height: none; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
+    .picker-row { flex: 1; align-content: flex-start; gap: 4px; }
+    .picker-sep { width: 100%; height: 1px; margin: 5px 0; }
+    .measures-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+    .beats-row { min-height: 60px; }
+    .pnote { min-width: 34px; padding: 5px 6px; font-size: 0.74rem; }
+    .pnote small { display: none; }
+    .picker-hint { font-size: 0.65rem; margin-bottom: 5px; }
+    .ctl { padding: 5px 9px; font-size: 0.72rem; }
+    .bpm-num { font-size: 0.85rem; }
+  }
   @media (min-width: 768px) and (max-width: 1023px) {
     .comp-header { flex-wrap: nowrap; padding: 10px 20px; }
     .comp-body { padding: 14px 20px; }
@@ -2190,17 +2210,51 @@ function noteToFreq(str) {
 
 function playPiano(freq, dur, when) {
   const ctx = getACtx();
+
+  // ── 마스터 게인 (2단계 감쇠: 타건 직후 빠른 초기감쇠 → 긴 서스테인 감쇠) ──
   const mg = ctx.createGain();
   mg.connect(ctx.destination);
+  const vel = 0.38;
   mg.gain.setValueAtTime(0, when);
-  mg.gain.linearRampToValueAtTime(0.42, when + 0.012);
-  mg.gain.exponentialRampToValueAtTime(0.001, when + Math.max(dur * 0.88, 0.08));
-  [[1,0.58,'triangle'],[2,0.22,'sine'],[3,0.1,'sine'],[4,0.04,'sine']].forEach(([r,g,t]) => {
-    const osc = ctx.createOscillator(), gn = ctx.createGain();
+  mg.gain.linearRampToValueAtTime(vel, when + 0.007);          // 빠른 어택
+  mg.gain.setTargetAtTime(vel * 0.35, when + 0.007, 0.06);    // 초기 감쇠
+  mg.gain.setTargetAtTime(0.0008, when + 0.08, Math.max(dur * 0.55, 0.18)); // 긴 감쇠
+  mg.gain.setValueAtTime(0.0008, when + dur + 0.7);
+
+  // ── 현의 인하모닉성: f_n = n·f0·√(1 + B·n²) ──
+  const B = 0.00008 * Math.pow(freq / 130, 1.6);
+
+  // 배음 구성 [배수, 게인] — 상위 배음일수록 빠르게 감쇠
+  const partials = [[1,1.0],[2,0.48],[3,0.22],[4,0.12],[5,0.06],[6,0.03],[7,0.015],[8,0.007]];
+  partials.forEach(([n, g]) => {
+    const f = n * freq * Math.sqrt(1 + B * n * n);
+    const osc = ctx.createOscillator();
+    const gn  = ctx.createGain();
     osc.connect(gn); gn.connect(mg);
-    osc.type = t; osc.frequency.value = freq * r; gn.gain.value = g;
-    osc.start(when); osc.stop(when + dur + 0.15);
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    // 상위 배음은 더 빨리 사라짐
+    gn.gain.setValueAtTime(g, when);
+    gn.gain.setTargetAtTime(g * 0.01, when + 0.015, 0.04 + 0.12 / n);
+    osc.start(when); osc.stop(when + dur + 0.8);
   });
+
+  // ── 해머 타격음 (짧은 노이즈 버스트) ──
+  const noiseLen = Math.ceil(ctx.sampleRate * 0.045);
+  const buf  = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < noiseLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / noiseLen);
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+  const nf = ctx.createBiquadFilter();
+  nf.type = 'bandpass';
+  nf.frequency.value = Math.min(freq * 3, 8000);
+  nf.Q.value = 0.7;
+  const ng = ctx.createGain();
+  noise.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+  ng.gain.setValueAtTime(0.055, when);
+  ng.gain.exponentialRampToValueAtTime(0.001, when + 0.045);
+  noise.start(when); noise.stop(when + 0.05);
 }
 
 function previewNote(str) {
