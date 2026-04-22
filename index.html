@@ -558,7 +558,8 @@ function transposeChord(chord, semitones) {
 }
 
 function transposeProgression(chords, fromKey, toKey) {
-  const diff = (NOTE_SEMITONES[toKey] - NOTE_SEMITONES[fromKey] + 12) % 12;
+  const fromNote = fromKey.replace(/m$/, '');
+  const diff = (NOTE_SEMITONES[toKey] - NOTE_SEMITONES[fromNote] + 12) % 12;
   return chords.map(c => transposeChord(c, diff));
 }
 
