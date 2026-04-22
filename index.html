@@ -329,10 +329,172 @@
     color: var(--accent);
   }
 
+  /* ── Analyzer ── */
+  .analyzer-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .analyzer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent3), var(--success));
+  }
+  .analyzer-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  .analyzer-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1rem;
+    padding: 10px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .analyzer-input::placeholder { color: var(--text-muted); }
+  .analyzer-input:focus { border-color: var(--accent3); }
+  .analyze-btn {
+    background: linear-gradient(135deg, var(--accent3), var(--success));
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .analyze-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .analyze-btn:active { transform: translateY(0); }
+
+  .analysis-result {
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+  .analysis-key-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(56,189,248,0.12);
+    border: 1px solid rgba(56,189,248,0.3);
+    border-radius: 10px;
+    padding: 6px 14px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    color: var(--accent3);
+    font-weight: 700;
+  }
+  .analysis-key-badge .confidence {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+  .analysis-roman-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+    align-items: flex-end;
+  }
+  .analysis-chord-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .analysis-chord-original {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 7px 13px;
+    min-width: 50px;
+    text-align: center;
+  }
+  .analysis-chord-original.non-diatonic {
+    border-color: var(--warning);
+    color: var(--warning);
+  }
+  .analysis-roman-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-align: center;
+  }
+  .analysis-arrow {
+    color: var(--border);
+    font-size: 1rem;
+    padding-bottom: 20px;
+  }
+  .features-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .features-list li {
+    font-size: 0.85rem;
+    color: var(--text);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .features-list li .icon { flex-shrink: 0; }
+  .analysis-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .analysis-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .similar-match {
+    background: rgba(124,109,250,0.1);
+    border: 1px solid rgba(124,109,250,0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .similar-match:hover { background: rgba(124,109,250,0.2); }
+  .analysis-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-style: italic;
+  }
+
   @media (max-width: 600px) {
     header .logo { font-size: 1.5rem; }
     #results { grid-template-columns: 1fr; }
     .chord-name { padding: 6px 10px; font-size: 0.95rem; min-width: 44px; }
+    .analyzer-input-row { flex-direction: column; }
+    .analyze-btn { width: 100%; }
   }
 </style>
 </head>
@@ -342,6 +504,16 @@
     <div class="logo">🎵 코드 진행 추천기</div>
     <p class="subtitle">장르와 분위기를 선택하면 어울리는 코드 진행을 추천해드립니다</p>
   </header>
+
+  <div class="analyzer-card">
+    <div class="section-label" style="margin-bottom:12px">🔍 코드 진행 분석기</div>
+    <div class="analyzer-input-row">
+      <input type="text" id="analyzer-input" class="analyzer-input"
+             placeholder="예: Am F C G  또는  Cmaj7 Am7 Dm7 G7  또는  Em C G D" />
+      <button id="analyze-btn" class="analyze-btn">분석하기</button>
+    </div>
+    <div id="analysis-result" class="analysis-result" style="display:none"></div>
+  </div>
 
   <div class="filter-bar">
     <div class="section-label">장르 선택</div>
@@ -805,6 +977,280 @@ const DB = [
 let selectedGenres = new Set();
 let selectedMoods  = new Set();
 let selectedKey    = 'C';
+
+// ─── Chord Analyzer ──────────────────────────────────────────────────────────
+
+const MAJOR_DIATONIC = [
+  {semi:0,  roman:'I',    q:'major'},
+  {semi:2,  roman:'ii',   q:'minor'},
+  {semi:4,  roman:'iii',  q:'minor'},
+  {semi:5,  roman:'IV',   q:'major'},
+  {semi:7,  roman:'V',    q:'major'},
+  {semi:9,  roman:'vi',   q:'minor'},
+  {semi:11, roman:'vii°', q:'dim'},
+];
+const MINOR_DIATONIC = [
+  {semi:0,  roman:'i',   q:'minor'},
+  {semi:2,  roman:'ii°', q:'dim'},
+  {semi:3,  roman:'III', q:'major'},
+  {semi:5,  roman:'iv',  q:'minor'},
+  {semi:7,  roman:'v',   q:'minor'},
+  {semi:8,  roman:'VI',  q:'major'},
+  {semi:10, roman:'VII', q:'major'},
+];
+// Chromatic degree names relative to a key root
+const CHR_MAJOR = ['I','♭II','II','♭III','III','IV','♭V','V','♭VI','VI','♭VII','VII'];
+const CHR_MINOR = ['i','♭II','ii','III','♯III','iv','♭v','v','VI','♯vi','VII','♯vii'];
+
+function parseChordObj(str) {
+  const m = str.match(/^([A-G][#b]?)(.*)/);
+  if (!m) return null;
+  const root = m[1][0].toUpperCase() + m[1].slice(1);
+  const rest = m[2];
+  const restL = rest.toLowerCase();
+  let quality = 'major';
+  if (/^(m(?!aj)|min\b)/.test(restL)) quality = 'minor';
+  else if (/dim/.test(restL))         quality = 'dim';
+  else if (/aug|\+/.test(restL))      quality = 'aug';
+  const hasMaj7 = /maj7/i.test(rest);
+  const has7    = !hasMaj7 && /7/.test(rest);
+  const hasSus  = /sus/i.test(rest);
+  return { root, quality, hasMaj7, has7, hasSus, original: str };
+}
+
+function parseInput(input) {
+  return input.trim()
+    .split(/[\s,\-–→|]+/)
+    .map(s => s.trim())
+    .filter(s => s && /^[A-Ga-g]/.test(s))
+    .map(parseChordObj)
+    .filter(Boolean);
+}
+
+function scoreKey(chords, keySemi, diatonic, isMinor) {
+  let score = 0;
+  for (const c of chords) {
+    const cs = NOTE_SEMITONES[c.root];
+    if (cs === undefined) continue;
+    const diff = ((cs - keySemi) + 12) % 12;
+    const entry = diatonic.find(d => d.semi === diff);
+    if (entry) {
+      score += c.quality === entry.q ? 2 : 1;
+    }
+    // Harmonic minor: V (major) on degree 7 in minor key
+    if (isMinor && diff === 7 && c.quality === 'major') score += 1;
+  }
+  return score;
+}
+
+function detectKey(chords) {
+  let best = { key: 'C', isMinor: false, score: -1 };
+  for (let s = 0; s < 12; s++) {
+    const mj = scoreKey(chords, s, MAJOR_DIATONIC, false);
+    if (mj > best.score) best = { key: SEMITONE_NAMES[s], isMinor: false, score: mj };
+    const mn = scoreKey(chords, s, MINOR_DIATONIC, true);
+    if (mn > best.score) best = { key: SEMITONE_NAMES[s], isMinor: true, score: mn };
+  }
+  const confidence = Math.min(100, Math.round((best.score / (chords.length * 2)) * 100));
+  return { ...best, confidence };
+}
+
+function getRoman(chord, keySemi, isMinor) {
+  const cs = NOTE_SEMITONES[chord.root];
+  if (cs === undefined) return '?';
+  const diff = ((cs - keySemi) + 12) % 12;
+  const diatonic = isMinor ? MINOR_DIATONIC : MAJOR_DIATONIC;
+  const entry = diatonic.find(d => d.semi === diff);
+
+  let roman, nonDiatonic = false;
+  if (entry) {
+    if      (chord.quality === 'major') roman = entry.roman.replace('°','').toUpperCase();
+    else if (chord.quality === 'minor') roman = entry.roman.replace('°','').toLowerCase();
+    else if (chord.quality === 'dim')   roman = entry.roman.toLowerCase().replace(/°?$/, '°');
+    else if (chord.quality === 'aug')   roman = entry.roman.toUpperCase() + '+';
+    else                                roman = entry.roman;
+  } else {
+    nonDiatonic = true;
+    let base = isMinor ? CHR_MINOR[diff] : CHR_MAJOR[diff];
+    if      (chord.quality === 'major') roman = base.toUpperCase();
+    else if (chord.quality === 'minor') roman = base.toLowerCase();
+    else if (chord.quality === 'dim')   roman = base.toLowerCase() + '°';
+    else                                roman = base;
+  }
+
+  if (chord.hasMaj7) roman += 'maj7';
+  else if (chord.has7) roman += '7';
+  if (chord.hasSus)   roman += 'sus';
+  return { roman, nonDiatonic };
+}
+
+function analyzeFeatures(chords, romanInfos, key, isMinor) {
+  const features = [];
+  const nonDiatonicCount = romanInfos.filter(r => r.nonDiatonic).length;
+  const total = chords.length;
+  const hasSeventh = chords.some(c => c.has7 || c.hasMaj7);
+  const hasMaj7    = chords.some(c => c.hasMaj7);
+  const hasDim     = chords.some(c => c.quality === 'dim');
+  const hasAug     = chords.some(c => c.quality === 'aug');
+  const hasSus     = chords.some(c => c.hasSus);
+
+  // Key feel
+  if (isMinor) {
+    features.push({ icon: '🎭', text: `단조(${key}m) 기반 — 감성적이고 내성적인 분위기` });
+  } else {
+    features.push({ icon: '☀️', text: `장조(${key}) 기반 — 밝고 안정적인 분위기` });
+  }
+
+  // Diatonic status
+  if (nonDiatonicCount === 0) {
+    features.push({ icon: '✅', text: '모든 코드가 조성 내 화음 — 안정적이고 자연스러운 흐름' });
+  } else {
+    const borrowed = romanInfos.filter(r => r.nonDiatonic).map((r, i) => chords[romanInfos.indexOf(r)]?.original).join(', ');
+    features.push({ icon: '🎨', text: `조성 밖 화음 ${nonDiatonicCount}개 포함 (${borrowed}) — 색채적인 변화` });
+  }
+
+  // 7th chords
+  if (hasMaj7) {
+    features.push({ icon: '🎷', text: 'maj7 화음 사용 — 재즈/보사노바 특유의 부드럽고 세련된 색채' });
+  } else if (hasSeventh) {
+    features.push({ icon: '🎺', text: '도미넌트 7화음 포함 — 텐션과 해결감이 강조됨' });
+  }
+
+  // Dim / Aug / Sus
+  if (hasDim) features.push({ icon: '😰', text: '감화음(dim) 포함 — 불안정하고 긴장감 있는 순간 연출' });
+  if (hasAug) features.push({ icon: '✨', text: '증화음(aug) 포함 — 몽환적이고 불안한 색채' });
+  if (hasSus) features.push({ icon: '🌊', text: 'sus 화음 포함 — 해결 전 부유하는 느낌' });
+
+  // Cadence check (last chord)
+  const lastRoman = romanInfos[romanInfos.length - 1]?.roman ?? '';
+  const lastBase  = lastRoman.replace(/maj7|sus|\d|°|\+/g, '').replace(/[*♭♯]/g, '').toLowerCase();
+  if (lastBase === 'i' || lastBase === 'i') {
+    features.push({ icon: '🔒', text: '마지막 화음이 으뜸화음(I/i) — 완전 종지, 안정적 마무리' });
+  } else if (lastBase === 'v') {
+    features.push({ icon: '⏭️', text: '마지막 화음이 딸림화음(V) — 미완결 종지, 다음으로 이어지는 느낌' });
+  } else if (lastBase === 'iv' || lastBase === 'iv') {
+    features.push({ icon: '🌅', text: '마지막 화음이 IV — 플라갈 종지, 차분하게 열린 느낌' });
+  }
+
+  // Progression movement
+  const semis = chords.map(c => NOTE_SEMITONES[c.root]).filter(v => v !== undefined);
+  const diffs = semis.slice(1).map((s, i) => ((s - semis[i] + 12) % 12));
+  const hasFifthDown = diffs.some(d => d === 5); // down a 5th = up a 4th
+  const hasFourthUp  = diffs.some(d => d === 7); // up a 5th
+  if (hasFifthDown) {
+    features.push({ icon: '🔄', text: '5도 하강(4도 상승) 움직임 포함 — 재즈에서 자주 쓰이는 강한 해결감' });
+  }
+
+  // Suggest moods & genres based on characteristics
+  const moodSuggestions = [];
+  const genreSuggestions = [];
+
+  if (isMinor) {
+    moodSuggestions.push('슬프고 감성적인', '신비로운');
+    genreSuggestions.push('R&B / 소울', '록');
+  } else {
+    moodSuggestions.push('밝고 경쾌한', '낭만적인');
+    genreSuggestions.push('팝', '포크 / 어쿠스틱');
+  }
+  if (hasMaj7) { genreSuggestions.push('재즈', '보사노바'); moodSuggestions.push('편안하고 차분한'); }
+  else if (hasSeventh && !isMinor) { genreSuggestions.push('블루스'); moodSuggestions.push('에너제틱'); }
+  if (nonDiatonicCount > 0 && isMinor) moodSuggestions.push('긴장감 / 어두운');
+
+  return {
+    features,
+    moods:  [...new Set(moodSuggestions)].slice(0, 3),
+    genres: [...new Set(genreSuggestions)].slice(0, 4),
+  };
+}
+
+function findSimilarInDB(romanInfos, isMinor) {
+  const inputRomans = romanInfos.map(r => r.roman.replace(/maj7|sus|\d|°|\+|\*/g,'').toLowerCase());
+  return DB.filter(entry => {
+    if (entry.romans.length !== inputRomans.length) return false;
+    const entryRomans = entry.romans.map(r => r.replace(/[⁷maj]/g,'').toLowerCase().replace('°',''));
+    return entryRomans.every((r, i) => r === inputRomans[i]);
+  });
+}
+
+function renderAnalysis(input) {
+  const chords = parseInput(input);
+  const resultEl = document.getElementById('analysis-result');
+
+  if (chords.length < 2) {
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `<p style="color:var(--text-muted);font-size:0.88rem">⚠️ 코드를 2개 이상 입력해주세요. (예: Am F C G)</p>`;
+    return;
+  }
+
+  const { key, isMinor, confidence } = detectKey(chords);
+  const keySemi = NOTE_SEMITONES[key];
+  const romanInfos = chords.map(c => getRoman(c, keySemi, isMinor));
+  const { features, moods, genres } = analyzeFeatures(chords, romanInfos, key, isMinor);
+  const similar = findSimilarInDB(romanInfos, isMinor);
+
+  // Build roman row HTML
+  const romanRowHTML = chords.map((c, i) => {
+    const { roman, nonDiatonic } = romanInfos[i];
+    const isLast = i === chords.length - 1;
+    return `
+      <div class="analysis-chord-box">
+        <div class="analysis-chord-original ${nonDiatonic ? 'non-diatonic' : ''}">${c.original}</div>
+        <div class="analysis-roman-label">${roman}</div>
+      </div>
+      ${!isLast ? '<div class="analysis-arrow">›</div>' : ''}
+    `;
+  }).join('');
+
+  const featuresHTML = features.map(f =>
+    `<li><span class="icon">${f.icon}</span><span>${f.text}</span></li>`
+  ).join('');
+
+  const moodTagsHTML = moods.map(m =>
+    `<span class="tag tag-mood">${m}</span>`
+  ).join('');
+
+  const genreTagsHTML = genres.map(g =>
+    `<span class="tag tag-genre">${g}</span>`
+  ).join('');
+
+  const similarHTML = similar.length > 0
+    ? `<div style="margin-top:14px">
+        <div class="analysis-section-title">📚 데이터베이스 매칭</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${similar.map(p => `<div class="similar-match">✓ "${p.title}"와 동일한 진행</div>`).join('')}
+        </div>
+      </div>`
+    : '';
+
+  const nonDiatonicNote = romanInfos.some(r => r.nonDiatonic)
+    ? `<p class="analysis-hint">* 표시는 감지된 조성(${key}${isMinor ? 'm' : ''}) 밖의 화음입니다.</p>`
+    : '';
+
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    <div class="analysis-key-badge">
+      🎹 감지된 조성: <strong>${key}${isMinor ? ' 단조' : ' 장조'}</strong>
+      <span class="confidence">(신뢰도 ${confidence}%)</span>
+    </div>
+    <div class="analysis-section-title">로마 숫자 분석</div>
+    <div class="analysis-roman-row">${romanRowHTML}</div>
+    <div class="analysis-section-title">주요 특징</div>
+    <ul class="features-list">${featuresHTML}</ul>
+    <div class="analysis-section-title" style="margin-top:12px">분위기</div>
+    <div class="analysis-tags-row" style="margin-bottom:10px">${moodTagsHTML}</div>
+    <div class="analysis-section-title">어울리는 장르</div>
+    <div class="analysis-tags-row">${genreTagsHTML}</div>
+    ${similarHTML}
+    ${nonDiatonicNote}
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn   = document.getElementById('analyze-btn');
+  const input = document.getElementById('analyzer-input');
+  btn.addEventListener('click', () => renderAnalysis(input.value));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') renderAnalysis(input.value); });
+});
 
 // ─── Init chips ─────────────────────────────────────────────────────────────
 function buildChips(items, containerId, selectedSet, onToggle) {
