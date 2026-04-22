@@ -657,6 +657,145 @@
   .sn.sn-root  { background: rgba(124,109,250,0.15); border-color: var(--accent);  color: var(--accent);  }
   .sn.sn-chord { background: rgba(52,211,153,0.12);  border-color: var(--success); color: var(--success); }
 
+  /* ── Composer ── */
+  .compose-btn {
+    background: rgba(192,132,252,0.08);
+    border: 1px solid rgba(192,132,252,0.25);
+    border-radius: 8px; color: var(--accent2);
+    font-size: 0.76rem; font-weight: 700;
+    padding: 5px 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .compose-btn:hover { background: rgba(192,132,252,0.2); border-color: var(--accent2); }
+
+  .composer-overlay {
+    display: none; position: fixed; inset: 0;
+    z-index: 300; flex-direction: column; background: #09090f;
+  }
+  .composer-overlay.open { display: flex; }
+
+  .comp-header {
+    background: var(--surface); border-bottom: 1.5px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center;
+    gap: 12px; flex-shrink: 0; flex-wrap: wrap;
+  }
+  .comp-title-wrap { flex: 1; min-width: 0; }
+  .comp-title { font-size: 0.9rem; font-weight: 800; }
+  .comp-subtitle { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+  .comp-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  .ctl {
+    border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text);
+    font-size: 0.78rem; font-weight: 700; font-family: inherit;
+    padding: 6px 12px; cursor: pointer; white-space: nowrap; transition: all 0.13s;
+  }
+  .ctl:hover { border-color: var(--accent3); color: var(--accent3); }
+  .ctl.ctl-play { border-color: var(--success); color: var(--success); background: rgba(52,211,153,0.08); }
+  .ctl.ctl-play:hover, .ctl.ctl-play.playing { background: var(--success); color: #000; }
+  .ctl.ctl-loop.on { border-color: var(--accent3); color: var(--accent3); background: rgba(56,189,248,0.1); }
+  .ctl.ctl-danger { border-color: rgba(248,113,113,0.4); color: rgba(248,113,113,0.7); }
+  .ctl.ctl-danger:hover { background: rgba(248,113,113,0.1); }
+
+  .bpm-box {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 5px 10px;
+  }
+  .bpm-lbl { font-size: 0.68rem; color: var(--text-muted); font-weight: 700; }
+  .bpm-num { min-width: 30px; text-align: center; font-weight: 800; font-size: 0.9rem; }
+  .bpm-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 0 3px; transition: color 0.12s; font-family: inherit; }
+  .bpm-btn:hover { color: var(--text); }
+
+  /* Composer body */
+  .comp-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .measures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+  }
+  .measure-box {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 12px 12px 14px;
+    transition: border-color 0.18s;
+  }
+  .measure-box.sel-measure { border-color: var(--accent); }
+
+  .mbox-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .mbox-chord { font-size: 1.1rem; font-weight: 900; }
+  .mbox-roman {
+    font-size: 0.72rem; font-weight: 700;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1px 7px; color: var(--text-muted);
+  }
+  .mbox-num { font-size: 0.65rem; color: var(--text-muted); margin-left: auto; }
+
+  .beats-row { display: flex; gap: 3px; min-height: 76px; }
+
+  .bblock {
+    border: 2px solid var(--border); border-radius: 9px;
+    background: var(--surface2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; cursor: pointer; position: relative;
+    padding: 5px 2px 4px; min-width: 0; overflow: hidden;
+    transition: border-color 0.12s, background 0.12s, transform 0.1s;
+    user-select: none;
+  }
+  .bblock:hover { border-color: var(--accent3); transform: translateY(-1px); }
+  .bblock.bb-sel   { border-color: var(--accent)  !important; background: rgba(124,109,250,0.15); }
+  .bblock.bb-play  { border-color: var(--warning) !important; background: rgba(251,191,36,0.18); }
+  .bblock.bb-root  { background: rgba(124,109,250,0.18); border-color: rgba(124,109,250,0.5); }
+  .bblock.bb-chord { background: rgba(52,211,153,0.14);  border-color: rgba(52,211,153,0.4); }
+  .bblock.bb-scale { background: rgba(56,189,248,0.1);   border-color: rgba(56,189,248,0.35); }
+
+  .bb-note { font-size: 0.8rem; font-weight: 900; line-height: 1.1; text-align: center; color: var(--text); }
+  .bb-note.c-root  { color: var(--accent); }
+  .bb-note.c-chord { color: var(--success); }
+  .bb-note.c-scale { color: var(--accent3); }
+  .bb-oct  { font-size: 0.5rem; color: var(--text-muted); }
+  .bb-sym  { font-size: 1rem; color: #35354a; }
+  .bb-dur  { font-size: 0.5rem; color: var(--text-muted); font-weight: 600; }
+
+  .bb-split {
+    position: absolute; top: 2px; right: 2px;
+    background: rgba(56,189,248,0.12); border: none; border-radius: 4px;
+    color: var(--accent3); font-size: 0.6rem;
+    width: 14px; height: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s; padding: 0; font-family: inherit;
+  }
+  .bb-split:hover { background: rgba(56,189,248,0.3); }
+
+  /* Note picker footer */
+  .comp-footer {
+    background: var(--surface); border-top: 1.5px solid var(--border);
+    padding: 12px 16px 14px; flex-shrink: 0;
+    max-height: 155px; overflow-y: auto;
+  }
+  .picker-hint {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+  }
+  .picker-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .picker-sep { width: 1px; background: var(--border); height: 38px; margin: 0 3px; flex-shrink: 0; }
+
+  .pnote {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 5px 8px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--surface2);
+    color: var(--text-muted); font-size: 0.82rem; font-weight: 800;
+    cursor: pointer; transition: all 0.12s; min-width: 38px;
+  }
+  .pnote small { font-size: 0.52rem; font-weight: 500; margin-top: 1px; }
+  .pnote.pn-root  { border-color: var(--accent);  color: var(--accent);  background: rgba(124,109,250,0.1); }
+  .pnote.pn-chord { border-color: var(--success); color: var(--success); background: rgba(52,211,153,0.08); }
+  .pnote.pn-scale { border-color: rgba(56,189,248,0.35); color: var(--accent3); }
+  .pnote.pn-rest  { font-style: italic; }
+  .pnote.pn-act   { box-shadow: 0 0 0 2px rgba(124,109,250,0.55); transform: scale(1.06); }
+  .pnote:hover     { filter: brightness(1.25); transform: translateY(-2px); }
+
   @media (max-width: 600px) {
     header .logo { font-size: 1.5rem; }
     #results { grid-template-columns: 1fr; }
@@ -664,6 +803,9 @@
     .analyzer-input-row { flex-direction: column; }
     .analyze-btn { width: 100%; }
     .modal-box { padding: 16px; }
+    .comp-header { flex-direction: column; align-items: flex-start; }
+    .comp-controls { margin-left: 0; width: 100%; }
+    .measures-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -708,6 +850,34 @@
 <div class="modal-overlay" id="note-modal">
   <div class="modal-box" id="note-modal-box">
     <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- Composer Overlay -->
+<div class="composer-overlay" id="composer-overlay">
+  <div class="comp-header">
+    <div class="comp-title-wrap">
+      <div class="comp-title">🎼 <span id="comp-title-text">간단 작곡기</span></div>
+      <div class="comp-subtitle" id="comp-subtitle"></div>
+    </div>
+    <div class="comp-controls">
+      <div class="bpm-box">
+        <span class="bpm-lbl">BPM</span>
+        <button class="bpm-btn" id="bpm-dn">−</button>
+        <span class="bpm-num" id="bpm-num">100</span>
+        <button class="bpm-btn" id="bpm-up">+</button>
+      </div>
+      <button class="ctl ctl-play"   id="comp-play">▶ 재생</button>
+      <button class="ctl"            id="comp-stop">■ 정지</button>
+      <button class="ctl ctl-loop"   id="comp-loop">🔁 반복</button>
+      <button class="ctl ctl-danger" id="comp-reset">↺ 초기화</button>
+      <button class="ctl"            id="comp-close">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="comp-body" id="comp-body"></div>
+  <div class="comp-footer">
+    <div class="picker-hint" id="picker-hint">박자 블록을 클릭하면 여기서 음을 선택할 수 있습니다</div>
+    <div class="picker-row"  id="picker-row"></div>
   </div>
 </div>
 
@@ -1422,12 +1592,7 @@ function renderAnalysis(input) {
   `;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const btn   = document.getElementById('analyze-btn');
-  const input = document.getElementById('analyzer-input');
-  btn.addEventListener('click', () => renderAnalysis(input.value));
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') renderAnalysis(input.value); });
-});
+// (analyzer events wired below, after composer)
 
 // ─── Init chips ─────────────────────────────────────────────────────────────
 function buildChips(items, containerId, selectedSet, onToggle) {
@@ -1525,7 +1690,10 @@ function render() {
       <div class="card-tags" style="margin-bottom:10px">${moodTags}</div>
       <div class="card-desc">${p.desc}</div>
       <div class="card-footer">
-        <button class="note-btn">🎹 코드별 사용 음</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="note-btn">🎹 코드별 사용 음</button>
+          <button class="compose-btn">🎼 작곡하기</button>
+        </div>
         <button class="copy-btn" data-chords="${transposedChords.join(' – ')}">복사</button>
       </div>
     `;
@@ -1542,6 +1710,7 @@ function render() {
     });
 
     card.querySelector('.note-btn').addEventListener('click', () => openNoteModal(p));
+    card.querySelector('.compose-btn').addEventListener('click', () => openComposer(p));
 
     container.appendChild(card);
   });
@@ -1759,6 +1928,296 @@ function closeNoteModal() {
 // Close modal on Escape key
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeNoteModal();
+});
+
+// ─── Composer ────────────────────────────────────────────────────────────────
+
+const comp = {
+  prog: null, bpm: 100, loop: false,
+  measures: [], selMi: null, selBi: null,
+  isPlaying: false, timers: [], audioCtx: null,
+};
+
+function getACtx() {
+  if (!comp.audioCtx)
+    comp.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return comp.audioCtx;
+}
+
+function noteToFreq(str) {
+  const m = str.match(/^([A-G][#b]?)(\d+)$/);
+  if (!m) return 440;
+  const T = {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11};
+  const s = T[m[1]]; if (s === undefined) return 440;
+  return 440 * Math.pow(2, (s + (parseInt(m[2]) + 1) * 12 - 69) / 12);
+}
+
+function playPiano(freq, dur, when) {
+  const ctx = getACtx();
+  const mg = ctx.createGain();
+  mg.connect(ctx.destination);
+  mg.gain.setValueAtTime(0, when);
+  mg.gain.linearRampToValueAtTime(0.42, when + 0.012);
+  mg.gain.exponentialRampToValueAtTime(0.001, when + Math.max(dur * 0.88, 0.08));
+  [[1,0.58,'triangle'],[2,0.22,'sine'],[3,0.1,'sine'],[4,0.04,'sine']].forEach(([r,g,t]) => {
+    const osc = ctx.createOscillator(), gn = ctx.createGain();
+    osc.connect(gn); gn.connect(mg);
+    osc.type = t; osc.frequency.value = freq * r; gn.gain.value = g;
+    osc.start(when); osc.stop(when + dur + 0.15);
+  });
+}
+
+function previewNote(str) {
+  try {
+    const ctx = getACtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    playPiano(noteToFreq(str), 0.45, ctx.currentTime + 0.01);
+  } catch(e) {}
+}
+
+/* Available scale notes for a chord */
+function getAvailableNotes(chordStr) {
+  const chord = parseChordObj(chordStr); if (!chord) return [];
+  const rootS = NOTE_SEMITONES[chord.root] ?? 0;
+  const ctype = getChordType(chord);
+  const scale = (SCALE_RECS_DB[ctype] ?? SCALE_RECS_DB.major)[0];
+  const cIvls = CHORD_TONE_IVLS[ctype] ?? [0,4,7];
+  const out = [];
+  for (let midi = 48; midi <= 84; midi++) {
+    const semi = midi % 12, oct = Math.floor(midi / 12) - 1;
+    const rel = ((semi - rootS) + 12) % 12;
+    if (!scale.ivls.includes(rel)) continue;
+    out.push({
+      name: `${SEMITONE_NAMES[semi]}${oct}`,
+      noteName: SEMITONE_NAMES[semi], oct, midi, rel,
+      isRoot: rel === 0, isChord: cIvls.includes(rel),
+    });
+  }
+  return out;
+}
+
+function blockColorCls(block, chordStr) {
+  if (!block.note) return { bg:'', txt:'' };
+  const chord = parseChordObj(chordStr); if (!chord) return { bg:'', txt:'' };
+  const rootS = NOTE_SEMITONES[chord.root] ?? 0;
+  const noteSemi = NOTE_SEMITONES[block.note.replace(/\d+$/, '')] ?? 0;
+  const rel = ((noteSemi - rootS) + 12) % 12;
+  const ctype = getChordType(chord);
+  const cIvls = CHORD_TONE_IVLS[ctype] ?? [0,4,7];
+  if (rel === 0)           return { bg:'bb-root',  txt:'c-root' };
+  if (cIvls.includes(rel)) return { bg:'bb-chord', txt:'c-chord' };
+  return                          { bg:'bb-scale', txt:'c-scale' };
+}
+
+/* Composition state */
+let _bid = 0;
+function mkBlock(units, note=null) { return { id:`b${++_bid}`, units, note }; }
+
+function initComp(prog) {
+  comp.prog = prog; _bid = 0; comp.selMi = null; comp.selBi = null;
+  const tr = transposeProgression(prog.chords, prog.key, selectedKey);
+  comp.measures = tr.map((chordStr, i) => ({
+    chordStr, roman: prog.romans[i] || '',
+    blocks: [mkBlock(4), mkBlock(4), mkBlock(4), mkBlock(4)],
+  }));
+}
+
+function splitBlock(mi, bi) {
+  const b = comp.measures[mi].blocks[bi];
+  if (b.units <= 1) return;
+  const h = b.units / 2;
+  comp.measures[mi].blocks.splice(bi, 1, mkBlock(h, b.note), mkBlock(h));
+  comp.selMi = mi; comp.selBi = bi;
+  renderMeasures(); renderPicker();
+}
+
+function selectBlock(mi, bi) {
+  comp.selMi = mi; comp.selBi = bi;
+  renderMeasures(); renderPicker();
+  const b = comp.measures[mi].blocks[bi];
+  if (b.note) previewNote(b.note);
+}
+
+function setNote(noteStr) {
+  if (comp.selMi === null) return;
+  comp.measures[comp.selMi].blocks[comp.selBi].note = noteStr || null;
+  if (noteStr) previewNote(noteStr);
+  renderMeasures(); renderPicker();
+}
+
+/* Render measures */
+const DUR_SYM = { 4:'♩', 2:'♪', 1:'♬' };
+const DUR_TXT = { 4:'4분음표', 2:'8분음표', 1:'16분음표' };
+
+function renderMeasures() {
+  const body = document.getElementById('comp-body');
+  let html = '<div class="measures-grid">';
+  comp.measures.forEach((m, mi) => {
+    html += `<div class="measure-box ${comp.selMi===mi?'sel-measure':''}">
+      <div class="mbox-header">
+        <span class="mbox-chord">${m.chordStr}</span>
+        <span class="mbox-roman">${m.roman}</span>
+        <span class="mbox-num">마디 ${mi+1}</span>
+      </div><div class="beats-row">`;
+    m.blocks.forEach((b, bi) => {
+      const sel = comp.selMi===mi && comp.selBi===bi;
+      const cls = blockColorCls(b, m.chordStr);
+      const np  = b.note ? b.note.match(/^([A-G][#b]?)(\d+)$/) : null;
+      html += `<div class="bblock ${cls.bg} ${sel?'bb-sel':''}"
+                   data-mi="${mi}" data-bi="${bi}" data-units="${b.units}"
+                   style="flex:${b.units}">
+        ${b.units>1?`<button class="bb-split" data-mi="${mi}" data-bi="${bi}">÷</button>`:''}
+        ${np
+          ? `<div class="bb-note ${cls.txt}">${np[1]}<span class="bb-oct">${np[2]}</span></div>`
+          : `<div class="bb-sym">${DUR_SYM[b.units]}</div>`}
+        <div class="bb-dur">${DUR_TXT[b.units]}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+
+  body.querySelectorAll('.bblock').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('.bb-split')) return;
+      selectBlock(+el.dataset.mi, +el.dataset.bi);
+    });
+  });
+  body.querySelectorAll('.bb-split').forEach(el => {
+    el.addEventListener('click', e => { e.stopPropagation(); splitBlock(+el.dataset.mi, +el.dataset.bi); });
+  });
+}
+
+/* Render note picker */
+function renderPicker() {
+  const hint = document.getElementById('picker-hint');
+  const row  = document.getElementById('picker-row');
+  if (comp.selMi === null) {
+    hint.textContent = '박자 블록을 클릭하면 여기서 음을 선택할 수 있습니다';
+    row.innerHTML = ''; return;
+  }
+  const m = comp.measures[comp.selMi];
+  const b = m.blocks[comp.selBi];
+  const chord = parseChordObj(m.chordStr);
+  const ctype = chord ? getChordType(chord) : 'major';
+  const durTxt = DUR_TXT[b.units];
+  const scaleName = SCALE_RECS_DB[ctype]?.[0]?.name ?? '';
+  hint.textContent = `음 선택 — ${m.chordStr} (${m.roman})  ·  ${scaleName} 기준  ·  ${durTxt}`;
+
+  const notes = getAvailableNotes(m.chordStr);
+  let html = `<button class="pnote pn-rest ${!b.note?'pn-act':''}" data-note="">쉼표<small>rest</small></button>`;
+  let lastOct = -1;
+  notes.forEach(n => {
+    if (n.oct !== lastOct && lastOct !== -1) html += '<div class="picker-sep"></div>';
+    lastOct = n.oct;
+    const cls = n.isRoot ? 'pn-root' : n.isChord ? 'pn-chord' : 'pn-scale';
+    const act = b.note === n.name ? 'pn-act' : '';
+    const sub = n.isRoot ? '근음' : n.isChord ? '코드음' : '스케일';
+    html += `<button class="pnote ${cls} ${act}" data-note="${n.name}">${n.noteName}<small>${n.oct}·${sub}</small></button>`;
+  });
+  row.innerHTML = html;
+  row.querySelectorAll('.pnote').forEach(btn => btn.addEventListener('click', () => setNote(btn.dataset.note)));
+}
+
+/* Playback */
+function startPlayback() {
+  stopPlayback();
+  const ctx = getACtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  const s16 = (60 / comp.bpm) / 4;
+  let t = ctx.currentTime + 0.06, total = 0;
+  const sched = [];
+  comp.measures.forEach((m, mi) => {
+    m.blocks.forEach((b, bi) => {
+      const dur = b.units * s16;
+      if (b.note) playPiano(noteToFreq(b.note), dur * 0.88, t);
+      sched.push({ mi, bi, t }); t += dur; total += dur;
+    });
+  });
+  comp.isPlaying = true;
+  const pb = document.getElementById('comp-play');
+  pb.classList.add('playing'); pb.textContent = '▶ 재생 중';
+
+  const now = ctx.currentTime;
+  sched.forEach(({mi, bi, t: when}) => {
+    comp.timers.push(setTimeout(() => {
+      document.querySelectorAll('.bblock').forEach(el => el.classList.remove('bb-play'));
+      document.querySelector(`.bblock[data-mi="${mi}"][data-bi="${bi}"]`)?.classList.add('bb-play');
+    }, (when - now) * 1000));
+  });
+  comp.timers.push(setTimeout(() => {
+    document.querySelectorAll('.bblock').forEach(el => el.classList.remove('bb-play'));
+    if (comp.loop) startPlayback();
+    else { comp.isPlaying = false; pb.classList.remove('playing'); pb.textContent = '▶ 재생'; }
+  }, total * 1000 + 80));
+}
+
+function stopPlayback() {
+  comp.timers.forEach(clearTimeout); comp.timers = [];
+  comp.isPlaying = false;
+  const pb = document.getElementById('comp-play');
+  if (pb) { pb.classList.remove('playing'); pb.textContent = '▶ 재생'; }
+  document.querySelectorAll('.bblock').forEach(el => el.classList.remove('bb-play'));
+}
+
+/* Open / Close */
+function openComposer(prog) {
+  stopPlayback(); initComp(prog);
+  document.getElementById('comp-title-text').textContent = prog.title;
+  document.getElementById('comp-subtitle').textContent =
+    `Key: ${selectedKey}  ·  ${prog.genres.join(' / ')}  ·  ${prog.feel}`;
+  document.getElementById('bpm-num').textContent = comp.bpm;
+  document.getElementById('comp-loop').classList.remove('on');
+  document.getElementById('comp-loop').textContent = '🔁 반복';
+  comp.loop = false;
+  renderMeasures(); renderPicker();
+  document.getElementById('composer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeComposer() {
+  stopPlayback();
+  document.getElementById('composer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* Wire events */
+document.getElementById('analyze-btn').addEventListener('click', () =>
+  renderAnalysis(document.getElementById('analyzer-input').value));
+document.getElementById('analyzer-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') renderAnalysis(document.getElementById('analyzer-input').value);
+});
+document.getElementById('comp-play').addEventListener('click', startPlayback);
+document.getElementById('comp-stop').addEventListener('click', stopPlayback);
+document.getElementById('comp-loop').addEventListener('click', function() {
+  comp.loop = !comp.loop;
+  this.classList.toggle('on', comp.loop);
+  this.textContent = comp.loop ? '🔁 반복 ON' : '🔁 반복';
+});
+document.getElementById('comp-reset').addEventListener('click', () => {
+  stopPlayback(); initComp(comp.prog); renderMeasures(); renderPicker();
+});
+document.getElementById('comp-close').addEventListener('click', closeComposer);
+document.getElementById('bpm-dn').addEventListener('click', () => {
+  comp.bpm = Math.max(40, comp.bpm - 5);
+  document.getElementById('bpm-num').textContent = comp.bpm;
+});
+document.getElementById('bpm-up').addEventListener('click', () => {
+  comp.bpm = Math.min(240, comp.bpm + 5);
+  document.getElementById('bpm-num').textContent = comp.bpm;
+});
+document.addEventListener('keydown', e => {
+  const open = document.getElementById('composer-overlay').classList.contains('open');
+  if (!open) return;
+  if (e.key === 'Escape') { closeComposer(); return; }
+  if (e.key === ' ' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    comp.isPlaying ? stopPlayback() : startPlayback();
+  }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && comp.selMi !== null && e.target.tagName !== 'BUTTON') {
+    e.preventDefault(); setNote('');
+  }
 });
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
