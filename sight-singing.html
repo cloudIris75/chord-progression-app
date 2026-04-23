@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시창 연습</title>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #232333;
+    --border: #2e2e42;
+    --accent: #7c6dfa;
+    --accent2: #c084fc;
+    --accent3: #38bdf8;
+    --text: #e2e2f0;
+    --muted: #8888aa;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+  .controls {
+    max-width: 720px;
+    margin: 0 auto 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+  }
+  .control-group label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  select, input[type=range] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+  }
+  select:focus { border-color: var(--accent); }
+  input[type=range] { padding: 4px 8px; accent-color: var(--accent); }
+  .btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-play {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #fff;
+  }
+  .btn-stop {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: #fff;
+  }
+  .score-wrapper {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 8px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+    overflow-x: auto;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #score-container {
+    width: 100%;
+  }
+  .action-row {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .info-panel {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: none;
+  }
+  .info-panel.visible { display: block; }
+  .info-panel h3 {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .note-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .note-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    color: var(--accent3);
+    font-weight: 600;
+  }
+  .note-pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .difficulty-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .badge-easy { background: #065f46; color: #34d399; }
+  .badge-medium { background: #78350f; color: #fbbf24; }
+  .badge-hard { background: #7f1d1d; color: #f87171; }
+  .tip {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+  .progress-bar-wrap {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+    display: none;
+  }
+  .progress-bar-wrap.visible { display: block; }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 40px;
+  }
+  @media (max-width: 500px) {
+    h1 { font-size: 1.4rem; }
+    .score-wrapper { padding: 12px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🎵 시창 연습</h1>
+<p class="subtitle">난이도별 8마디 멜로디로 시창 실력을 키워보세요</p>
+
+<div class="controls">
+  <div class="control-group">
+    <label>난이도</label>
+    <select id="difficulty">
+      <option value="easy">초급 — 도레미파솔</option>
+      <option value="medium" selected>중급 — 장음계 전체</option>
+      <option value="hard">고급 — 반음·리듬 포함</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label>조성</label>
+    <select id="key-select">
+      <option value="C">C장조</option>
+      <option value="G">G장조</option>
+      <option value="F">F장조</option>
+      <option value="D">D장조</option>
+      <option value="Bb">Bb장조</option>
+      <option value="A">A장조</option>
+    </select>
+  </div>
+  <div class="control-group" style="min-width:160px;">
+    <label>템포 <span id="bpm-label">80</span> BPM</label>
+    <input type="range" id="tempo" min="50" max="140" value="80" step="5">
+  </div>
+</div>
+
+<div class="score-wrapper">
+  <div id="score-container"></div>
+</div>
+
+<div class="progress-bar-wrap" id="pb-wrap">
+  <div id="progress-bar"></div>
+</div>
+
+<div class="action-row">
+  <button class="btn btn-primary" id="btn-generate">🎲 새 멜로디 생성</button>
+  <button class="btn btn-play" id="btn-play" disabled>▶ 재생</button>
+  <button class="btn btn-stop" id="btn-stop" disabled>■ 정지</button>
+</div>
+
+<div class="info-panel" id="info-panel">
+  <div id="difficulty-badge"></div>
+  <h3>음표 순서</h3>
+  <div class="note-list" id="note-list"></div>
+  <p class="tip" id="tip-text"></p>
+</div>
+
+<footer>시창 연습 앱 · Web Audio API + VexFlow</footer>
+
+<script>
+// ── 음정 주파수 테이블 ──────────────────────────────────────────
+const NOTE_FREQ = {
+  'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'B3':246.94,
+  'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'B4':493.88,
+  'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00,'B5':987.77,
+  'Bb3':233.08,'Bb4':466.16,'F#4':369.99,'C#4':277.18,'G#4':415.30,'D#4':311.13,
+  'Eb4':311.13,'Ab4':415.30,'F#3':184.99,'C#5':554.37,'G#3':207.65,
+};
+
+// ── 조성별 음계 정의 ───────────────────────────────────────────
+const SCALES = {
+  C:  ['C4','D4','E4','F4','G4','A4','B4','C5'],
+  G:  ['G3','A3','B3','C4','D4','E4','F#4','G4'],
+  F:  ['F3','G3','A3','Bb3','C4','D4','E4','F4'],
+  D:  ['D4','E4','F#4','G4','A4','B4','C#5','D5'],
+  Bb: ['Bb3','C4','D4','Eb4','F4','G4','A4','Bb4'],
+  A:  ['A3','B3','C#4','D4','E4','F#4','G#4','A4'],
+};
+
+// VexFlow 표기용 음이름 매핑
+const NOTE_DISPLAY = {
+  'Bb3':'Bb/3','Bb4':'Bb/4','F#4':'F#/4','C#4':'C#/4','G#4':'G#/4',
+  'D#4':'D#/4','Eb4':'Eb/4','Ab4':'Ab/4','F#3':'F#/3','C#5':'C#/5','G#3':'G#/3',
+};
+function toVex(n) {
+  if (NOTE_DISPLAY[n]) return NOTE_DISPLAY[n];
+  const letter = n.slice(0,-1);
+  const oct    = n.slice(-1);
+  return `${letter}/${oct}`;
+}
+
+// ── 난이도별 생성 설정 ─────────────────────────────────────────
+const DIFFICULTY_CFG = {
+  easy: {
+    scaleSlice: [0,1,2,3,4],          // 도레미파솔만
+    durations: ['q','q','q','q'],      // 4분음표만
+    timePerMeasure: 4,                 // 4/4박자, 4박
+    leapLimit: 2,                      // 최대 2도 도약
+    badge: '초급', badgeClass: 'badge-easy',
+    tip: '도레미파솔 5음만 사용합니다. 음정 간격이 좁아 따라 부르기 쉬워요.',
+  },
+  medium: {
+    scaleSlice: [0,1,2,3,4,5,6,7],
+    durations: ['q','q','h','q','q','q','h'],
+    timePerMeasure: 4,
+    leapLimit: 4,
+    badge: '중급', badgeClass: 'badge-medium',
+    tip: '8음 장음계 전체를 사용하며 2분음표가 포함됩니다.',
+  },
+  hard: {
+    scaleSlice: null,                  // 반음 포함 전체
+    durations: ['q','e','e','q','h','e','e','q','q'],
+    timePerMeasure: 4,
+    leapLimit: 7,
+    badge: '고급', badgeClass: 'badge-hard',
+    tip: '반음(#/b)과 8분음표가 포함됩니다. 음정 도약이 크고 리듬이 복잡해요.',
+  },
+};
+
+const DUR_BEATS = { 'w':4, 'h':2, 'q':1, 'e':0.5, 's':0.25 };
+
+// ── 멜로디 생성 ────────────────────────────────────────────────
+function generateMelody(difficulty, keyName) {
+  const cfg   = DIFFICULTY_CFG[difficulty];
+  const scale = SCALES[keyName];
+  const pool  = cfg.scaleSlice ? cfg.scaleSlice.map(i => scale[i]) : scale;
+
+  const measures = [];
+  let prevIdx = Math.floor(pool.length / 2);
+
+  for (let m = 0; m < 8; m++) {
+    const measure = [];
+    let beats = 0;
+    while (beats < cfg.timePerMeasure) {
+      const remaining = cfg.timePerMeasure - beats;
+      // pick duration that fits
+      const okDurs = cfg.durations.filter(d => DUR_BEATS[d] <= remaining + 0.01);
+      const dur = okDurs[Math.floor(Math.random() * okDurs.length)] || 'q';
+      const b   = DUR_BEATS[dur];
+
+      // pick note: prefer stepwise
+      let idx;
+      const r = Math.random();
+      if (r < 0.65) {
+        // step
+        const delta = Math.random() < 0.5 ? 1 : -1;
+        idx = Math.max(0, Math.min(pool.length - 1, prevIdx + delta));
+      } else {
+        // leap within leapLimit
+        const min = Math.max(0, prevIdx - cfg.leapLimit);
+        const max = Math.min(pool.length - 1, prevIdx + cfg.leapLimit);
+        idx = min + Math.floor(Math.random() * (max - min + 1));
+      }
+      prevIdx = idx;
+      measure.push({ note: pool[idx], dur });
+      beats += b;
+    }
+    measures.push(measure);
+  }
+  return measures;
+}
+
+// ── VexFlow 악보 렌더링 ────────────────────────────────────────
+const { Renderer, Stave, StaveNote, Voice, Formatter, Accidental, Beam, StaveConnector } = Vex.Flow;
+
+function renderScore(measures, keyName) {
+  const container = document.getElementById('score-container');
+  container.innerHTML = '';
+
+  const isMobile = window.innerWidth < 600;
+  const measuresPerRow = isMobile ? 2 : 4;
+  const rows = [];
+  for (let i = 0; i < measures.length; i += measuresPerRow) {
+    rows.push(measures.slice(i, i + measuresPerRow));
+  }
+
+  // key signature accidentals count for width
+  const keySigWidth = { C:0, G:1, F:1, D:2, Bb:2, A:3 };
+  const staveW = isMobile ? 140 : 158;
+  const firstExtra = 30 + (keySigWidth[keyName] || 0) * 12;
+
+  rows.forEach((row, ri) => {
+    const totalW = firstExtra + staveW * row.length + 20;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('width', totalW);
+    svg.setAttribute('height', 130);
+    container.appendChild(svg);
+
+    const renderer = new Renderer(svg, Renderer.Backends.SVG);
+    renderer.resize(totalW, 130);
+    const ctx = renderer.getContext();
+
+    let x = 10;
+    row.forEach((measure, mi) => {
+      const isFirst = (mi === 0);
+      const w = isFirst ? staveW + firstExtra : staveW;
+      const stave = new Stave(x, 10, w);
+      if (isFirst) {
+        stave.addClef('treble');
+        stave.addKeySignature(keyName === 'Bb' ? 'Bb' : keyName === 'F' ? 'F' : keyName);
+        stave.addTimeSignature('4/4');
+      }
+      if (ri === 0 && mi === 0) stave.setContext(ctx).draw();
+      else stave.setContext(ctx).draw();
+
+      // build VexFlow notes
+      const vfNotes = measure.map(({ note, dur }) => {
+        const vn = toVex(note);
+        const sn = new StaveNote({ keys: [vn], duration: dur });
+        // add accidentals
+        if (vn.includes('#')) sn.addModifier(new Accidental('#'), 0);
+        if (vn.includes('b') && !vn.startsWith('Bb')) sn.addModifier(new Accidental('b'), 0);
+        if (vn.startsWith('Bb')) sn.addModifier(new Accidental('b'), 0);
+        if (vn.startsWith('Eb')) sn.addModifier(new Accidental('b'), 0);
+        return sn;
+      });
+
+      const voice = new Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
+      voice.addTickables(vfNotes);
+
+      // auto-beam 8th notes
+      const beams = Beam.generateBeams(vfNotes);
+      new Formatter().joinVoices([voice]).format([voice], w - 20);
+      voice.draw(ctx, stave);
+      beams.forEach(b => b.setContext(ctx).draw());
+
+      x += w;
+    });
+  });
+}
+
+// ── 앱 상태 ────────────────────────────────────────────────────
+let currentMeasures = null;
+let audioCtx = null;
+let playTimeout = [];
+let isPlaying = false;
+let currentNoteIdx = -1;
+let allNotes = [];
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playNote(freq, startTime, duration, ctx) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.35, startTime + 0.02);
+  gain.gain.setValueAtTime(0.35, startTime + duration * 0.75);
+  gain.gain.linearRampToValueAtTime(0, startTime + duration);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.05);
+}
+
+function flattenNotes(measures) {
+  const notes = [];
+  measures.forEach(m => m.forEach(n => notes.push(n)));
+  return notes;
+}
+
+function startPlayback() {
+  if (isPlaying) return;
+  if (!currentMeasures) return;
+  isPlaying = true;
+  document.getElementById('btn-play').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+
+  const bpm = parseInt(document.getElementById('tempo').value);
+  const secPerBeat = 60 / bpm;
+  const ctx = getAudioCtx();
+  allNotes = flattenNotes(currentMeasures);
+
+  let t = ctx.currentTime + 0.1;
+  const totalDur = allNotes.reduce((s, n) => s + DUR_BEATS[n.dur] * secPerBeat, 0);
+  let elapsed = 0;
+
+  // progress bar
+  const pbWrap = document.getElementById('pb-wrap');
+  const pb     = document.getElementById('progress-bar');
+  pbWrap.classList.add('visible');
+  pb.style.width = '0%';
+
+  const pills = document.querySelectorAll('.note-pill');
+  let noteIdx = 0;
+
+  allNotes.forEach((n, i) => {
+    const freq = NOTE_FREQ[n.note] || 440;
+    const dur  = DUR_BEATS[n.dur] * secPerBeat;
+    playNote(freq, t, dur, ctx);
+
+    // highlight pill
+    const delay = (t - ctx.currentTime) * 1000;
+    const tid = setTimeout(() => {
+      pills.forEach(p => p.classList.remove('active'));
+      if (pills[i]) pills[i].classList.add('active');
+      // progress
+      elapsed += dur * 1000;
+      pb.style.width = Math.min(100, (elapsed / (totalDur * 1000)) * 100) + '%';
+    }, delay);
+    playTimeout.push(tid);
+
+    t += dur;
+  });
+
+  // done
+  const doneTid = setTimeout(() => {
+    stopPlayback(true);
+  }, (t - ctx.currentTime) * 1000 + 100);
+  playTimeout.push(doneTid);
+}
+
+function stopPlayback(finished = false) {
+  isPlaying = false;
+  playTimeout.forEach(clearTimeout);
+  playTimeout = [];
+  document.getElementById('btn-play').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  document.querySelectorAll('.note-pill').forEach(p => p.classList.remove('active'));
+  if (!finished) {
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('pb-wrap').classList.remove('visible');
+  } else {
+    setTimeout(() => {
+      document.getElementById('pb-wrap').classList.remove('visible');
+      document.getElementById('progress-bar').style.width = '0%';
+    }, 600);
+  }
+}
+
+function generate() {
+  if (isPlaying) stopPlayback();
+  const difficulty = document.getElementById('difficulty').value;
+  const keyName    = document.getElementById('key-select').value;
+  const cfg = DIFFICULTY_CFG[difficulty];
+
+  currentMeasures = generateMelody(difficulty, keyName);
+  renderScore(currentMeasures, keyName);
+
+  // info panel
+  const panel = document.getElementById('info-panel');
+  panel.classList.add('visible');
+
+  document.getElementById('difficulty-badge').innerHTML =
+    `<span class="difficulty-badge ${cfg.badgeClass}">${cfg.badge}</span> ${keyName}장조`;
+
+  const noteList = document.getElementById('note-list');
+  noteList.innerHTML = '';
+  allNotes = flattenNotes(currentMeasures);
+  allNotes.forEach(n => {
+    const pill = document.createElement('span');
+    pill.className = 'note-pill';
+    const display = n.note.replace(/(\d)/,'<sub>$1</sub>');
+    const durLabel = { q:'♩', h:'𝅗𝅥', e:'♪', w:'○' }[n.dur] || '';
+    pill.innerHTML = `${display} ${durLabel}`;
+    noteList.appendChild(pill);
+  });
+
+  document.getElementById('tip-text').textContent = cfg.tip;
+  document.getElementById('btn-play').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+}
+
+// ── 이벤트 ────────────────────────────────────────────────────
+document.getElementById('btn-generate').addEventListener('click', generate);
+document.getElementById('btn-play').addEventListener('click', startPlayback);
+document.getElementById('btn-stop').addEventListener('click', () => stopPlayback());
+document.getElementById('tempo').addEventListener('input', function() {
+  document.getElementById('bpm-label').textContent = this.value;
+});
+
+// 초기 생성
+generate();
+</script>
+</body>
+</html>
