@@ -372,13 +372,16 @@ function renderScore(measures, keyName) {
     rows.push(measures.slice(i, i + measuresPerRow));
   }
 
-  const keySigWidth = { C:0, G:1, F:1, D:2, Bb:2, A:3 };
-  const staveW = isMobile ? 140 : 158;
-  const firstExtra = 30 + (keySigWidth[keyName] || 0) * 12;
+  const keySigExtra = { C:0, G:1, F:1, D:2, Bb:2, A:3 };
+  // 마디당 최대 음표 수에 따라 오선 너비를 동적으로 계산
+  const maxNotes = Math.max(...measures.map(m => m.length));
+  const minSlot  = isMobile ? 26 : 30;
+  const staveW   = Math.max(isMobile ? 130 : 150, maxNotes * minSlot + 20);
+  const firstExtra = 44 + (keySigExtra[keyName] || 0) * 13;
 
-  rows.forEach((row, ri) => {
-    const totalW = firstExtra + staveW * row.length + 20;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  rows.forEach((row) => {
+    const totalW = firstExtra + staveW * row.length + 24;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', totalW);
     svg.setAttribute('height', 130);
     container.appendChild(svg);
@@ -389,31 +392,33 @@ function renderScore(measures, keyName) {
 
     let x = 10;
     row.forEach((measure, mi) => {
-      const isFirst = (mi === 0);
-      const w = isFirst ? staveW + firstExtra : staveW;
+      const w = mi === 0 ? staveW + firstExtra : staveW;
       const stave = new Stave(x, 10, w);
-      if (isFirst) {
+      if (mi === 0) {
         stave.addClef('treble');
-        stave.addKeySignature(keyName === 'Bb' ? 'Bb' : keyName === 'F' ? 'F' : keyName);
+        stave.addKeySignature(keyName);
         stave.addTimeSignature('4/4');
       }
       stave.setContext(ctx).draw();
 
-      const vfNotes = measure.map(({ note, dur }) => {
-        const vn = toVex(note);
-        const sn = new StaveNote({ keys: [vn], duration: dur });
-        if (vn.includes('#')) sn.addModifier(new Accidental('#'), 0);
-        if (vn.startsWith('Bb') || vn.startsWith('Eb')) sn.addModifier(new Accidental('b'), 0);
-        return sn;
-      });
+      try {
+        const vfNotes = measure.map(({ note, dur }) =>
+          new StaveNote({ keys: [toVex(note)], duration: dur })
+        );
 
-      const voice = new Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
-      voice.addTickables(vfNotes);
+        const voice = new Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
+        voice.addTickables(vfNotes);
 
-      const beams = Beam.generateBeams(vfNotes);
-      new Formatter().joinVoices([voice]).format([voice], w - 20);
-      voice.draw(ctx, stave);
-      beams.forEach(b => b.setContext(ctx).draw());
+        // 조표를 기준으로 필요한 변음표만 자동 처리
+        Accidental.applyAccidentals([voice], keyName);
+
+        const beams = Beam.generateBeams(vfNotes);
+        new Formatter().joinVoices([voice]).format([voice], w - 28);
+        voice.draw(ctx, stave);
+        beams.forEach(b => b.setContext(ctx).draw());
+      } catch (err) {
+        console.warn('마디 렌더링 오류:', err);
+      }
 
       x += w;
     });
